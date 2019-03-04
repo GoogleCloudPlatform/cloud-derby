@@ -1,0 +1,12 @@
+[Unit]
+Description=The driver run code
+
+[Service]
+User=pi
+Group=pi
+EnvironmentFile=-/etc/sysconfig/driver.env
+WorkingDirectory=/home/pi/cloud-derby/car/driver/
+ExecStart=/bin/bash -c './run.sh --non-interactive'
+
+[Install]
+WantedBy=multi-user.target

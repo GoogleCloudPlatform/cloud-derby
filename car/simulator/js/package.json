@@ -1,0 +1,18 @@
+{
+  "name": "sensor-simulator",
+  "description": "Node.js app for Cloud Derby game - simulating sensor data from a car",
+  "version": "1.0.0",
+  "main": "sensor.js",
+  "author": "Google Inc.",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=4.3.2"
+  },
+  "scripts": {
+    "start": "node sensor.js"
+  },
+  "dependencies": {
+    "@google-cloud/pubsub": "^0.12.0",
+    "@google-cloud/storage": "1.6.0"
+  }
+}

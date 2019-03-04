@@ -1,0 +1,4 @@
+^(.*/)?\.sh$
+^(.*/)?\.out$
+tmp/
+node_modules/
