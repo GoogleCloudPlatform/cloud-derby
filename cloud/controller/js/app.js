@@ -387,12 +387,12 @@ router.get('/stats', (req, res) => {
     success: true,
     status: 200,
     data: {
-  		"totalErrors": totalErrors,
-  		"totalMessagesSent": totalMessagesSent,
-  		"totalMessagesReceived": totalMessagesReceived,
-  		"rejectedFormatMessages": rejectedFormatMessages,
-  		"rejectedOutOfOrderMessages": rejectedOutOfOrderMessages
-   	}
+      "totalErrors": totalErrors,
+      "totalMessagesSent": totalMessagesSent,
+      "totalMessagesReceived": totalMessagesReceived,
+      "rejectedFormatMessages": rejectedFormatMessages,
+      "rejectedOutOfOrderMessages": rejectedOutOfOrderMessages
+    }
   })
 });
 
@@ -403,10 +403,10 @@ router.get('/stats', (req, res) => {
  ************************************************************/
 router.get('/config/options', (req, res) => {
   res.status(200).json({
-		success: true,
+    success: true,
     status: 200,
     data: {
-    	"ballColors": ballColors,
+      "ballColors": ballColors,
       "drivingModes": drivingModes
     }
   })
@@ -421,12 +421,12 @@ router.get('/config', (req, res) => {
     success: true,
     status: 200,
     data: {
-  		"ballColor": ballColor,
-  		"currentDrivingMode": currentDrivingMode,
-  		"listenerStatus": listenerStatus,
-  		"commandTopic": process.env.COMMAND_TOPIC,
-  		"sensorSubscription": process.env.SENSOR_SUBSCRIPTION,
-  		"carId": carId
+      "ballColor": ballColor,
+      "currentDrivingMode": currentDrivingMode,
+      "listenerStatus": listenerStatus,
+      "commandTopic": process.env.COMMAND_TOPIC,
+      "sensorSubscription": process.env.SENSOR_SUBSCRIPTION,
+      "carId": carId
     }
   })
 });
@@ -437,32 +437,32 @@ router.get('/config', (req, res) => {
     This includes both client and system defined; read write and read only variables.
  ************************************************************/
 router.put('/config', validate.configParams, (req, res) => {
-	// ballColor
+  // ballColor
   if (req.body.ballColor) {
-   	ballColor = req.body.ballColor;
-   	let command = new DriveMessage();
-   	command.setColor(ballColor);
-  	publishCommand(command);
+    ballColor = req.body.ballColor;
+    let command = new DriveMessage();
+    command.setColor(ballColor);
+    publishCommand(command);
   }
 
-	// currentDrivingMode
+  // currentDrivingMode
   if (req.body.currentDrivingMode) {
-  	currentDrivingMode = req.body.currentDrivingMode;
-  	startListener();
-  	let command = new DriveMessage();
-		if (currentDrivingMode == DEBUG_MODE) {
-  		command.setModeDebug();
-		} else if (currentDrivingMode == MANUAL_MODE) {
-			command.setModeManual();
-		} else if (currentDrivingMode == AUTOMATIC_MODE) {
-		  command.setModeAutomatic();
-			// We want to do all the driving with a closed gripper to prevent
-			// random balls from getting into the grip
-  		command.gripperClose();
-  		command.sendSensorMessage();
-		}
-   	command.setOnDemandSensorRate();
-   	publishCommand(command);
+    currentDrivingMode = req.body.currentDrivingMode;
+    startListener();
+    let command = new DriveMessage();
+    if (currentDrivingMode == DEBUG_MODE) {
+      command.setModeDebug();
+    } else if (currentDrivingMode == MANUAL_MODE) {
+      command.setModeManual();
+    } else if (currentDrivingMode == AUTOMATIC_MODE) {
+      command.setModeAutomatic();
+      // We want to do all the driving with a closed gripper to prevent
+      // random balls from getting into the grip
+      command.gripperClose();
+      command.sendSensorMessage();
+    }
+    command.setOnDemandSensorRate();
+    publishCommand(command);
   }
 
   res.status(200).json({
@@ -473,16 +473,16 @@ router.put('/config', validate.configParams, (req, res) => {
 
 /************************************************************
   GET /messages
-	Description: Retrieve inbound and outbound messages for the device/car.
+  Description: Retrieve inbound and outbound messages for the device/car.
  ************************************************************/
 router.get('/messages', (req, res) => {
   res.status(200).json({
     success: true,
     status: 200,
     data: {
-  		"inboundMsgHistory": inboundMsgHistory,
-  		"outboundMsgHistory": outboundMsgHistory
-		}
+      "inboundMsgHistory": inboundMsgHistory,
+      "outboundMsgHistory": outboundMsgHistory
+    }
   })
 });
 
@@ -491,13 +491,13 @@ router.get('/messages', (req, res) => {
   Description: Create a new Manual driving message.
  ************************************************************/
 router.post('/messages/driving', validate.drivingMessageParams, (req, res) => {
-	// need to map the API request params to the manualCommand params
-	var paramNames = Object.keys(DRIVING_MESSAGE_PARAMS);
-	for (var i = 0; i < paramNames.length; i++) {
-		var paramName = paramNames[i];
-		req.body[DRIVING_MESSAGE_PARAMS[paramName]] = req.body[paramName];
-	}
-	publishCommand(manualCommand(req));
+  // need to map the API request params to the manualCommand params
+  var paramNames = Object.keys(DRIVING_MESSAGE_PARAMS);
+  for (var i = 0; i < paramNames.length; i++) {
+    var paramName = paramNames[i];
+    req.body[DRIVING_MESSAGE_PARAMS[paramName]] = req.body[paramName];
+  }
+  publishCommand(manualCommand(req));
 
   res.status(201).json({
     success: true,
@@ -507,12 +507,12 @@ router.post('/messages/driving', validate.drivingMessageParams, (req, res) => {
 
 /************************************************************
   POST /messages/debug
-	Description: Create a new Debug message
+  Description: Create a new Debug message
  ************************************************************/
 router.post('/messages/debug', validate.debugMessageParams, (req, res) => {
   let command;
-	//
-	// nextSensorMessage
+  //
+  // nextSensorMessage
   if (req.body.nextSensorMessage) {
     command = new DriveMessage();
     command.setModeDebug();
@@ -520,23 +520,23 @@ router.post('/messages/debug', validate.debugMessageParams, (req, res) => {
     publishCommand(command);
   }
 
-	// sendCommand
-	if (req.body.sendCommand) {
-  	// Before we send the current message to the car, we need to make sure we add one action - that is to send sensor message after processing other actions
-  	if (nextDrivingCommand === undefined) {
-    	// If there were no instructions to begin with, then we will create an empty command
-    	command = new DriveMessage();
-  	} else {
-    	command = nextDrivingCommand;
-  	}
-  	// Reset nextDrivingCommand to zero so it is not shown in the UI, unless we process another message
-  	nextDrivingCommand = undefined;
-  	command.setModeDebug();
-  	// Tell the car to send sensor message after acting on other actions
-  	command.setOnDemandSensorRate();
-  	// Push this command to the car
-  	publishCommand(command);
-	}
+  // sendCommand
+  if (req.body.sendCommand) {
+    // Before we send the current message to the car, we need to make sure we add one action - that is to send sensor message after processing other actions
+    if (nextDrivingCommand === undefined) {
+      // If there were no instructions to begin with, then we will create an empty command
+      command = new DriveMessage();
+    } else {
+      command = nextDrivingCommand;
+    }
+    // Reset nextDrivingCommand to zero so it is not shown in the UI, unless we process another message
+    nextDrivingCommand = undefined;
+    command.setModeDebug();
+    // Tell the car to send sensor message after acting on other actions
+    command.setOnDemandSensorRate();
+    // Push this command to the car
+    publishCommand(command);
+  }
 
   res.status(201).json({
     success: true,
