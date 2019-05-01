@@ -228,3 +228,5 @@ module.exports.debugMessageParams = function(req, res, next) {
   Module exports
 **************************************************************************/
 module.exports.DRIVING_MESSAGE_PARAMS = DRIVING_MESSAGE_PARAMS;
+module.exports.BALL_COLORS = BALL_COLORS;
+module.exports.DRIVING_MODES = DRIVING_MODES;
