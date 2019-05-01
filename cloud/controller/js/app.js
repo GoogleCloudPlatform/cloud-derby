@@ -34,6 +34,8 @@ const DEBUG_MODE = require('./drive-message').DEBUG_MODE;
 // Import the validation functions for the API
 const validate = require('./validate');
 const DRIVING_MESSAGE_PARAMS = require('./validate').DRIVING_MESSAGE_PARAMS;
+const BALL_COLORS = require('./validate').BALL_COLORS;
+const DRIVING_MODES = require('./validate').DRIVING_MODES;
 
 // Confiure external URL for help output
 const APP_URL = `https://${process.env.GOOGLE_CLOUD_PROJECT}.appspot.com/`;
@@ -405,8 +407,8 @@ router.get('/config/options', (req, res) => {
     success: true,
     status: 200,
     data: {
-      "ballColors": ballColors,
-      "drivingModes": drivingModes
+      "ballColors": BALL_COLORS,
+      "drivingModes": DRIVING_MODES
     }
   })
 });
@@ -423,9 +425,9 @@ router.get('/config', (req, res) => {
       "ballColor": ballColor,
       "currentDrivingMode": currentDrivingMode,
       "listenerStatus": listenerStatus,
-      "commandTopic": process.env.COMMAND_TOPIC,
-      "sensorSubscription": process.env.SENSOR_SUBSCRIPTION,
-      "carId": carId
+      "commandTopic": process.env.COMMAND_TOPIC || '',
+      "sensorSubscription": process.env.SENSOR_SUBSCRIPTION || '',
+      "carId": carId || ''
     }
   })
 });
