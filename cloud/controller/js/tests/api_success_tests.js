@@ -7,7 +7,7 @@ const DRIVING_MODES = require('../validate').DRIVING_MODES;
 
 var expect = chai.expect;
 
-describe('API Tests (/api)', function() {
+describe('API Successful Tests (/api)', function() {
 
   it('GET /: should return 200 and Welcome to the <APP NAME> API! message', function(done) {
     request(app)
@@ -91,6 +91,78 @@ describe('API Tests (/api)', function() {
     request(app)
       .post('/api/messages/debug')
       .send({'sendCommand': true})
+      .end(function(err, res) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.status).to.be.equal(201);
+        expect(res.statusCode).to.be.equal(201);
+        done();
+      });
+  });
+
+  it('POST /messages/driving: should return 201 for gripperOpen true', function(done) {
+    request(app)
+      .post('/api/messages/driving')
+      .send({'gripperOpen': true})
+      .end(function(err, res) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.status).to.be.equal(201);
+        expect(res.statusCode).to.be.equal(201);
+        done();
+      });
+  });
+
+  it('POST /messages/driving: should return 201 for gripperOpen false', function(done) {
+    request(app)
+      .post('/api/messages/driving')
+      .send({'gripperOpen': false})
+      .end(function(err, res) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.status).to.be.equal(201);
+        expect(res.statusCode).to.be.equal(201);
+        done();
+      });
+  });
+
+  it('POST /messages/driving: should return 201 for drivingSpeed:100, distance:100', function(done) {
+    request(app)
+      .post('/api/messages/driving')
+      .send({'drivingSpeed': 100, 'distance': 100})
+      .end(function(err, res) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.status).to.be.equal(201);
+        expect(res.statusCode).to.be.equal(201);
+        done();
+      });
+  });
+
+  it('POST /messages/driving: should return 201 for turnSpeed:200, angle:180', function(done) {
+    request(app)
+      .post('/api/messages/driving')
+      .send({'turnSpeed': 200, 'angle': 180})
+      .end(function(err, res) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.status).to.be.equal(201);
+        expect(res.statusCode).to.be.equal(201);
+        done();
+      });
+  });
+
+  it('POST /messages/driving: should return 201 for turnSpeed:200, angle:-180', function(done) {
+    request(app)
+      .post('/api/messages/driving')
+      .send({'turnSpeed': 100, 'angle': -180})
+      .end(function(err, res) {
+        expect(res.body.success).to.be.true;
+        expect(res.body.status).to.be.equal(201);
+        expect(res.statusCode).to.be.equal(201);
+        done();
+      });
+  });
+
+  it('POST /messages/driving: should return 201 for drivingSpeed:100, distance:-100', function(done) {
+    request(app)
+      .post('/api/messages/driving')
+      .send({'drivingSpeed': 100, 'distance': -100})
       .end(function(err, res) {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
