@@ -57,7 +57,7 @@ add_user() {
 
     $GAM create user $(user_name $USER_NUM $TEAM_NUM) firstname "User$USER_NUM" lastname "Member of Team $TEAM_NUM" password $PASSWORD
 
-    echo "$(user_name $USER_NUM $TEAM_NUM)@$DOMAIN,$PASSWORD" >> $USER_LIST
+    echo "$(user_name $USER_NUM $TEAM_NUM)@$DOMAIN,$PASSWORD" >> ${USER_LIST}
 }
 
 ###############################################################################

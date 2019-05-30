@@ -1,0 +1,18 @@
+# See https://git-scm.com/docs/gitignore
+
+**/node_modules
+**/target
+**/tmp
+**/*.pem
+**/*.log
+**/log.txt
+**/*.bak
+**/*.old
+**/nohup.out
+**/*.class
+**/app-generated.yml
+**/install.marker
+**/package-lock.json
+**/*service-account.json
+!**/.gitignore
+!**/.cloudignore

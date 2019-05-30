@@ -16,10 +16,25 @@
 # limitations under the License.
 #
 
-###########################################################
-# Script to be run when Inference VM restarts
-###########################################################
-ACCOUNT="<put_your_user_id_here>" # For example "user1team1pa"
-cd /home/${ACCOUNT}/cloud-derby/src/cloud/ml/inference
-echo "$(date) - starting inference app..." >> tmp/boot.log
-sudo -u $ACCOUNT ./run.sh
+###############################################
+# Car Driving Controller Test
+###############################################
+
+set -u # This prevents running the script if any of the variables have not been set
+set -e # Exit if error is detected during pipeline execution
+
+source ../../setenv-global.sh
+
+###############################################
+# MAIN
+###############################################
+print_header "Testing Driving Controller"
+
+mkdir -p tmp
+CWD=$(pwd)
+
+cd js
+npm test
+cd $CWD
+
+print_footer "Driving Controller test completed."

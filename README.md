@@ -16,8 +16,6 @@ this project you will learn how to use various GCP services:
 - DialogFlow
 - Security
 - Networking
-- BigQuery
-- DataStudio
 
 There are two subsystems in this project: (1) car, and (2) cloud. 
 Software running on the cloud controls movement of the car. 

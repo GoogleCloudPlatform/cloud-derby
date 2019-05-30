@@ -132,4 +132,4 @@ else
     echo_my "Running on GCP URL=$URL"
 fi
 
-print_footer "Controller has been started."
+print_footer "Driving Controller has been started."
