@@ -29,8 +29,6 @@ set -e # Exit if error is detected during pipeline execution
 
 echo "setenv-local.sh: start..."
 
-source $HOME/setenv-private.sh
-
 ### Project user home dir
 export BASE_PATH="$HOME"
 
@@ -84,16 +82,8 @@ export REGION_LEGACY="us-central" # there are corner cases where gcloud still re
 export HORIZONTAL_RESOLUTION_PIXELS=1024
 export VERTICAL_RESOLUTION_PIXELS=576
 
-### Switch that selects which repo to use - the GitHub or GCP Source Repo
-export GCP_REPO="gcp-repo-switch"
-export GITHUB_REPO="github-repo-switch"
-export SOURCE_REPO_SELECTOR=$GCP_REPO
-
 ### GitHub Repo with the source code
 export GITHUB_REPO_URL="https://github.com/GoogleCloudPlatform/cloud-derby"
-
-### This is the GCP Source Repo name with source code
-export GIT_REPO_NAME="cloud-derby-source"
 
 ### Name of the folder with the source code (not a full path)
 export SOURCE_FOLDER="cloud-derby"

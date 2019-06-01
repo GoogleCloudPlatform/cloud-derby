@@ -23,7 +23,7 @@
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
-source ../setenv-global.sh
+source ./setenv.sh
 
 ### How many teams will participate in the workshop
 NUM_TEAMS=15

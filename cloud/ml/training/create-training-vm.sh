@@ -179,14 +179,9 @@ create_gpu_vm()
   echo "source setenv-local.sh" > $LOCAL_DIR/clone-repo.sh
 
   # Note that we want $PROJECT_PATH to be written as such and not substituted with a real value, hence the escape character \ before $
-  if [ "$SOURCE_REPO_SELECTOR" == "$GCP_REPO" ]; then
-      echo "gcloud source repos clone $GIT_REPO_NAME \$PROJECT_PATH --project=$ADMIN_PROJECT_ID" >> $LOCAL_DIR/clone-repo.sh
-  else
-      echo "git clone $GITHUB_REPO_URL \$PROJECT_PATH" >> $LOCAL_DIR/clone-repo.sh
-  fi
+  echo "git clone $GITHUB_REPO_URL \$PROJECT_PATH" >> $LOCAL_DIR/clone-repo.sh
 
   cp $HOME/setenv-local.sh $LOCAL_DIR
-  cp $HOME/setenv-private.sh $LOCAL_DIR
   chmod u+x $LOCAL_DIR/*.sh
   REMOTE_DIR="~/"
   remote_copy $LOCAL_DIR $REMOTE_DIR $ZONE $VM_NAME
