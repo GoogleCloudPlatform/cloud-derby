@@ -18,7 +18,7 @@
 var process = require('process'); // Required for mocking environment variables
 
 /************************************************************
-    Settings for the game
+    Settings for the car robot
  ************************************************************/
 module.exports = ({
   // How many balls need to be collected to win the game

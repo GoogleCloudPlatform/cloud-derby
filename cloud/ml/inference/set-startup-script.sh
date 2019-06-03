@@ -26,4 +26,3 @@ set -u # This prevents running the script if any of the variables have not been 
 set -e # Exit if error is detected during pipeline execution
 
 gcloud compute instances add-metadata ${ML_VM} --metadata-from-file startup-script=vm-startup-script.sh
-    

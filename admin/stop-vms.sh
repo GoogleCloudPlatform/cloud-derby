@@ -86,9 +86,10 @@ scan_projects() {
 ###############################################################################
 stop_vms() {
     local VM_ID
-    echo_my "Scanning VMs for project '$1'..."
+    local PROJECT_ID=$1
+    echo_my "Scanning VMs for project '$PROJECT_ID'..."
 
-    local VM_LIST=$(gcloud compute instances list --project $1 --format="value(name)")
+    local VM_LIST=$(gcloud compute instances list --project $PROJECT_ID --format="value(name)")
     
     echo $VM_LIST
 
@@ -96,14 +97,14 @@ stop_vms() {
         if [[ ! -z "$VM_ID" ]] ; then
             VMS_TOTAL=$((VMS_TOTAL+1))
             # Get the zone of the instance
-            local ZONE=$(gcloud compute instances list --filter="name:($VM_ID)" --project $1 --format="value(zone)")
-            local STATUS=$(gcloud compute instances list --filter="name:($VM_ID)" --project $1 --format="value(status)")
-            echo_my "Found VM id '$VM_ID' with status '$STATUS'"
+            local ZONE=$(gcloud compute instances list --filter="name:($VM_ID)" --project $PROJECT_ID --format="value(zone)")
+            local STATUS=$(gcloud compute instances list --filter="name:($VM_ID)" --project $PROJECT_ID --format="value(status)")
+            echo_my "Found VM id '$VM_ID' with status '$STATUS' in project '$PROJECT_ID'"
             if [ $STATUS = "RUNNING" ] ; then
                 VMS_RUNNING=$((VMS_RUNNING+1))
                 if [ $COUNT_RUNNING_VM_ONLY = false ] ; then
-                    echo_my "Stopping VM id '$VM_ID'..."
-                    yes | gcloud compute instances stop $VM_ID --project $1 --zone=$ZONE | true # Ignore if error and proceed
+                    echo_my "Stopping VM id '$VM_ID' in project '$PROJECT_ID'..."
+                    yes | gcloud compute instances stop $VM_ID --project $PROJECT_ID --zone=$ZONE | true # Ignore if error and proceed
                 fi
             fi
         else

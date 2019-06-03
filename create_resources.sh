@@ -17,7 +17,7 @@
 #
 
 #############################################################################
-# Create car to cloud communication resources
+# Create car to cloud communication resources needed for Dialogflow
 #############################################################################
 
 set -u # This prevents running the script if any of the variables have not been set

@@ -372,7 +372,6 @@ fi
 # If there is not an environment file yet in the home directory of the user - make a copy
 if ! [ -f $HOME/setenv-local.sh ] ; then
     cp ./template-setenv-local.sh $HOME/setenv-local.sh
-    cp ./template-setenv-private.sh $HOME/setenv-private.sh
 fi
 
 source $HOME/setenv-local.sh

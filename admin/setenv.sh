@@ -24,12 +24,14 @@
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
-echo "setenv-private.sh: start..."
+echo "setenv.sh: start..."
+
+source ../setenv-global.sh
 
 ### Billing accound ID used to pay for project resources
 export BILLING_ACCOUNT_ID="<set your Billing ID here>"
 
-### This is the project that hosts the Git Repo with source code and other admin elements
-export ADMIN_PROJECT_ID="<set your Admin Project ID here>"
+### This is the project that hosts reference images and other admin elements
+export ADMIN_PROJECT_ID="administration-203923"
 
-echo "setenv-private.sh: done"
+echo "setenv.sh: done"

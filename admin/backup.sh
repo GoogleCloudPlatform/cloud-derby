@@ -24,7 +24,7 @@
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
-source ../setenv-global.sh
+source ./setenv.sh
 
 ### Directory for temp data
 TMP="tmp"
@@ -61,7 +61,7 @@ backup_images() {
 ###############################################################################
 backup_source() {
     local FOLDER=${BACKUP_BUCKET}/${NOW}
-    echo_my "Making a copy of source files from project '${ADMIN_PROJECT_ID}' repo '${GIT_REPO_NAME}' into project '${BACKUP_PROJECT_ID}' bucket '${FOLDER}'"
+    echo_my "Making a copy of source files from project '${ADMIN_PROJECT_ID}' into project '${BACKUP_PROJECT_ID}' bucket '${FOLDER}'"
 
     local CWD=$(pwd)
     local TMP=${HOME}/tmp/repo
@@ -69,7 +69,7 @@ backup_source() {
     mkdir -p $TMP
 
     # Clone the repo into a temp directory
-    gcloud source repos clone ${GIT_REPO_NAME} $TMP/$SOURCE_FOLDER --project=${ADMIN_PROJECT_ID}
+    git clone ${GITHUB_REPO_URL} $TMP/$SOURCE_FOLDER
 
     cd $TMP/$SOURCE_FOLDER
 

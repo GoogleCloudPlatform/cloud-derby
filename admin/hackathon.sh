@@ -23,10 +23,10 @@
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
-source ../setenv-global.sh
+source ./setenv.sh
 
 ### How many teams will participate in the workshop
-NUM_TEAMS=10
+NUM_TEAMS=15
 
 # In case we need to add extra teams - start with some number, otherwise set it to 1
 TEAM_START_NUM=1
@@ -35,11 +35,10 @@ TEAM_START_NUM=1
 NUM_PEOPLE_PER_TEAM=6
 
 ### Name of the event - to be added to user and group names
-EVENT_NAME="BMM"
+EVENT_NAME="CO"
 
 ### Folder that holds all project sub-folders for users
-# TOP_FOLDER="Feb-12-$EVENT_NAME"
-TOP_FOLDER="February-26-$EVENT_NAME"
+TOP_FOLDER="May-18-$EVENT_NAME"
 
 ### Domain name
 DOMAIN="cloudderby.io"
