@@ -17,6 +17,7 @@
 const VERSION = 0.91;
 const APP = 'DRIVING-CONTROL-APP';
 const express = require('express');
+const cors = require('cors')
 
 console.log(`***${APP} is starting up***`);
 
@@ -342,6 +343,9 @@ function debugDrivingForm() {
  ************************************************************/
 // Define the routes for the REST API
 var router = express.Router();              // get an instance of the express Router
+
+// CORS will be controlled by the API GW layer
+router.all('*', cors());
 
 // All of the API routes will be prefixed with /api
 app.use('/api', router);
