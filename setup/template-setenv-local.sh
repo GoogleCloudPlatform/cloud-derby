@@ -49,6 +49,7 @@ gcloud config set project "$PROJECT"
 ### This controls logic for the 4 hours event vs 8 hrs and makes some other assumptions
 #   true - we are currently doing 4 hours event and will automatically create some resources for the user
 #   false - we are doing 8 hours event and have users do many things by hand
+#		set this to "true" if you want to use the demo inference VM
 export FOUR_HOURS_EVENT="false"
 export DEMO_PROJECT="robot-derby-demo-1"
 export DEMO_INFERENCE_IP_NAME="ml-static-ip-47"
