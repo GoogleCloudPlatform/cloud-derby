@@ -30,6 +30,7 @@ describe('API Failure Tests (/api)', function() {
       .get('/api/unknown')
       .end(function(err, res) {
         expect(res.statusCode).to.be.equal(404);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -43,6 +44,7 @@ describe('API Failure Tests (/api)', function() {
         expect(res.body.success).to.be.false;
         expect(res.body.status).to.be.equal(400);
         expect(res.statusCode).to.be.equal(400);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -55,6 +57,7 @@ describe('API Failure Tests (/api)', function() {
         expect(res.body.success).to.be.false;
         expect(res.body.status).to.be.equal(400);
         expect(res.statusCode).to.be.equal(400);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -67,6 +70,7 @@ describe('API Failure Tests (/api)', function() {
         expect(res.body.success).to.be.false;
         expect(res.body.status).to.be.equal(400);
         expect(res.statusCode).to.be.equal(400);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });

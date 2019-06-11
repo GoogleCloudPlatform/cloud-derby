@@ -33,6 +33,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(200);
         expect(res.statusCode).to.be.equal(200);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -47,6 +48,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(200);
         expect(res.statusCode).to.be.equal(200);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -60,6 +62,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(200);
         expect(res.statusCode).to.be.equal(200);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -74,6 +77,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(200);
         expect(res.statusCode).to.be.equal(200);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -86,6 +90,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(200);
         expect(res.statusCode).to.be.equal(200);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -99,6 +104,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(200);
         expect(res.statusCode).to.be.equal(200);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -111,6 +117,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
         expect(res.statusCode).to.be.equal(201);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -123,6 +130,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
         expect(res.statusCode).to.be.equal(201);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -135,6 +143,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
         expect(res.statusCode).to.be.equal(201);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -147,6 +156,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
         expect(res.statusCode).to.be.equal(201);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -159,6 +169,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
         expect(res.statusCode).to.be.equal(201);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -171,6 +182,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
         expect(res.statusCode).to.be.equal(201);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
@@ -183,6 +195,7 @@ describe('API Successful Tests (/api)', function() {
         expect(res.body.success).to.be.true;
         expect(res.body.status).to.be.equal(201);
         expect(res.statusCode).to.be.equal(201);
+        expect(res.headers).to.have.property('access-control-allow-origin');
         done();
       });
   });
