@@ -27,6 +27,8 @@ const SEEK_HOME_TURN = require('./drive-message').SEEK_HOME_TURN;
 var DriveMessageSimulator = require('./simulation').DriveMessageSimulator;
 let driveSimulation = new DriveMessageSimulator();
 const TURN_SPEED = Settings.MAX_SPEED / 10;
+// Many GoPiGo motors are driving at different speed causing left and right motor to skew the car when driven at max, hence we reduce the max speed
+const DRIVE_SPEED = Settings.MAX_SPEED / 3;
 
 // Highest allowed Y coordinate of the top of the ball in the picture - if it is above this, we will discard the image as false positive for low confidence result
 // because balls should not fly in the air. Note that the coordinates of (0,0) are in the top left corner
@@ -116,7 +118,7 @@ module.exports = class Navigation {
         command.setCorrelationID(sensorMessage.timestampMs);
         return Promise.resolve(command)
           .then((command) => {
-            console.log("navigate2home(): done");
+            // console.log("navigate2home(): done");
             command.sendSensorMessage();
             return command;
           });
@@ -131,14 +133,14 @@ module.exports = class Navigation {
       - driving command
    ************************************************************/
   navigate2ball(sensorMessage) {
-    console.log("navigate2ball()...");
+    // console.log("navigate2ball()...");
 
     // Are we in a simulation mode?
     if (driveSimulation.simulate) {
       // If so, return fake series of commands
       return Promise.resolve()
         .then(() => {
-          console.log("navigate2ball...using driveSimulation");
+          console.log("navigate2ball: using driveSimulation");
           return driveSimulation.nextDrivingCommand();
         });
     }
@@ -168,7 +170,7 @@ module.exports = class Navigation {
         } else {
           // The ball was not found in the image. Need a strategy to seek the ball,
           // get it into the image frame and then navigate towards it
-          console.log("navigate2ball()... no object of proper type was found in the image.");
+          console.log("navigate2ball(): no object of proper type was found in the image.");
           command = this.ballSearchStrategy();
         }
 
@@ -176,7 +178,7 @@ module.exports = class Navigation {
         command.setCorrelationID(sensorMessage.timestampMs);
         return Promise.resolve(command)
           .then((command) => {
-            console.log("navigate2ball(): done");
+            // console.log("navigate2ball(): done");
             command.sendSensorMessage();
             return command;
           });
@@ -228,17 +230,17 @@ module.exports = class Navigation {
       // to change car position and take new pictures from there
       // Try to put a ball in a picture frame
       command.setGoalSeekBallMove();
-      let minDistanceMm = 100;
-      let maxRandomDistanceMm = 600;
+      let minDistanceMm = 300;
+      let maxRandomDistanceMm = 900;
       let distance = minDistanceMm + Math.floor(Math.random() * maxRandomDistanceMm);
-      if (Math.random() < 0.25) {
+      if (Math.random() < 0.20) {
         // On random rare occasion drive backward
         distance = -distance;
       }
 
       console.log("ballSearchStrategy(): moving by random distance of " + distance);
-      // Since we do not need high precision - can turn very quickly here
-      command.setSpeed(TURN_SPEED);
+      // Since we do not need high precision - can turn very quickly here - may help to push things away
+      command.setSpeed(Settings.MAX_SPEED);
       command.drive(distance);
     }
 
@@ -271,8 +273,8 @@ module.exports = class Navigation {
       // However if after several turns the home base was still not found, need to drive somewhere
       // to change car position and take new pictures from there
       command.setGoalGo2Base();
-      let minDistanceMm = 200;
-      let maxRandomDistanceMm = 700;
+      let minDistanceMm = 300;
+      let maxRandomDistanceMm = 900;
       let distance = minDistanceMm + Math.floor(Math.random() * maxRandomDistanceMm);
 
       console.log("homeSearchStrategy()... moving by random distance of " + distance);
@@ -371,13 +373,12 @@ module.exports = class Navigation {
     command.setModeAutomatic();
 
     // --- At this distance we can close gripper and have our ball
-    // Camera mounts used on cars in US East
-    const ballCaptureDistanceMm = 35;
+    const ballCaptureDistanceMm = 45;
     // Camera mounts used on cars in Europe
     // const ballCaptureDistanceMm = 70;
 
     // At this distance or closer we need to be moving slow not to kick the ball out too far
-    const slowApproachZoneMm = 250;
+    const slowApproachZoneMm = 300;
     // We can grasp the ball within this angle spread to each side
     const ballCaptureAngle = 10;
     // This is how far the car will drive super slowly to make sure ball is really in the gripper
@@ -395,29 +396,19 @@ module.exports = class Navigation {
       // We set the goal to check grip so that we come into this second time we know what we wanted to do - see code above
       command.setGoalCheck4Grip();
       // Drive backwards so we can make sure next time we still have the ball in the grip
-      command.setSpeed(Settings.MAX_SPEED / 2);
-      command.drive(-slowApproachZoneMm);
-      // It is more likely that the base is behind us - hence the turn
-      // command.setSpeed(Settings.MAX_SPEED);
-      // command.makeTurn(Math.floor(Math.random() * 90));
+      command.setSpeed(DRIVE_SPEED);
+      command.drive(-ballCaptureDistanceMm*3);
       return command;
     }
 
-    /* --------
-    This was the legacy method before obstacle detection
-    console.log("calculateBallDirections(): ball is either too far or is not aligned by angle.");
-    command.setGoalGo2Ball();
-    // Since we do need high precision - need to turn slowly
-    command.setSpeed(Settings.MAX_SPEED * 0.05);
-    command.makeTurn(angle);
-      ---------- */
-
     // First part of the distance go at max speed
-    let speed = Settings.MAX_SPEED;
+    let speed = DRIVE_SPEED;
 
     if (distance < slowApproachZoneMm) {
       console.log("calculateBallDirections(): ball is close! Let's slow down the car and adjust angle on approach.");
       command.setGoalGo2Ball();
+      // Turn slowly towards the ball to avoid jerking the car and kicking the ball
+      command.setSpeed(Settings.MAX_SPEED * 0.1);
       command.makeTurn(angle);
       command.gripperOpen();
       // Last part of the journey we need to slow down as to not kick the ball away
@@ -436,8 +427,6 @@ module.exports = class Navigation {
 
     command.setSpeed(speed);
     command.drive(distance);
-
-    console.log("calculateBallDirections(): done");
     return command;
   }
 
@@ -480,12 +469,12 @@ module.exports = class Navigation {
       return this.homeSearchStrategy();
     }
 
-    // We are close enough and at the proper angle so that we can capture the ball (yay!)
+    // We are close enough and at the proper angle so that we can move towards the base
     console.log("calculateHomeDirections(): moving towards the home base");
     command.setGoalGo2Base();
     command.setSpeed(TURN_SPEED);
     command.makeTurn(angle);
-    command.setSpeed(Settings.MAX_SPEED);
+    command.setSpeed(DRIVE_SPEED);
     command.drive(distance - BALL_RELEASE_DISTANCE + EXTRA_DISTANCE);
     return command;
   }
@@ -545,7 +534,7 @@ module.exports = class Navigation {
 
     console.log("findDistance(): Calculated: " + distanceMM.toFixed(0) + " mm");
     // This part below really should have been done by non-linear regression, but as a hack do it manually for now
-    if (distanceMM < 95) {
+    if (distanceMM < 115) {
       distanceMM = 20;
     } else if (distanceMM < 325) {
       distanceMM = distanceMM - 35;
