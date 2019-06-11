@@ -104,7 +104,7 @@ fi
 create_resources
 
 # Lookup actual IP address for inference VM from the static reference
-if $FOUR_HOURS_EVENT ; then
+if $USE_DEMO_INFERENCE ; then
     # Driving controller will be using the inference VM that has been stood up in advance in a different project
     export INFERENCE_IP=$(gcloud compute addresses describe $DEMO_INFERENCE_IP_NAME --region us-central1 --format="value(address)" --project $DEMO_PROJECT)
 else
@@ -118,9 +118,9 @@ if [ -f "nohup.out" ] ; then
     rm -rf nohup.out
 fi
 
-if $DEPLOY_LOCAL ;
+if $DRIVING_CONTROLLER_LOCAL ;
 then
-    echo_my "DEPLOY_LOCAL='$DEPLOY_LOCAL' (set it to false to deploy on GCP) - running on local machine (use this for test and dev only)..."
+    echo_my "DRIVING_CONTROLLER_LOCAL='$DRIVING_CONTROLLER_LOCAL' (set it to false to deploy on GCP) - running on local machine (use this for test and dev only)..."
     npm start
 else
     generate_yaml
