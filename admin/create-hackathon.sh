@@ -146,6 +146,27 @@ create_folders() {
         eval ${COMMAND}compute.securityAdmin
         eval ${COMMAND}source.admin
         eval ${COMMAND}clouddebugger.user
+        eval ${COMMAND}editor
+
+    done
+}
+
+###############################################################################
+# Update folder permissions
+###############################################################################
+update_permissions() {
+    echo_my "update_permissions(): started..."
+
+    local PARENT_FOLDER_ID=$(find_top_folder_id $TOP_FOLDER)
+    
+    for i in $(seq $TEAM_START_NUM $NUM_TEAMS);
+    do
+        local NEW_FOLDER_ID=$(find_folder_id $(team_folder_name $i) $PARENT_FOLDER_ID)
+
+        # See docs: https://cloud.google.com/iam/docs/understanding-roles
+        local COMMAND="gcloud alpha resource-manager folders add-iam-policy-binding $NEW_FOLDER_ID --member=group:$(team_name $i)@$DOMAIN --role=roles/"
+
+        eval ${COMMAND}editor
 
     done
 }
@@ -162,5 +183,7 @@ create_read_only_group
 create_groups_and_users
 
 create_folders
+
+# update_permissions
 
 print_footer "SUCCESS: New workshop configuration created."
