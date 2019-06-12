@@ -34,11 +34,11 @@ create_static_inference_ip()
   if gcloud compute addresses list | grep $ML_IP_NAME; then
     echo_my "Static IP address $ML_IP_NAME found OK"
   else
-      if $AUTO_CREATE_IP ; then
+      if [ ! -z ${AUTO_CREATE_IP+x} ]; then
           echo "Creating static external IP for ML VM... '$ML_IP_NAME'"
           gcloud compute addresses create $ML_IP_NAME --region $REGION
       else
-          echo "Skipping automatic creation of static IP because AUTO_CREATE_IP variable is set to FALSE"
+          echo "Skipping automatic creation of static IP because AUTO_CREATE_IP variable is not set"
       fi
   fi
 }
@@ -89,10 +89,10 @@ remote_copy()
 configure_firewall()
 {
   # Only configure firewall if we are in automatic "fast path" mode - aka users are not creating these things by hand
-  if $AUTO_CREATE_FIREWALL ; then
+  if [ ! -z ${AUTO_CREATE_FIREWALL+x} ]; then
       open_http_firewall_port $HTTP_PORT
   else
-      echo "Skipping automatic creation of firewall because AUTO_CREATE_FIREWALL variable is set to FALSE"
+      echo "Skipping automatic creation of firewall because AUTO_CREATE_FIREWALL variable is not set"
   fi
 
   # Deep Learning VM has pre-installed Python Lab on port 8080
