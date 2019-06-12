@@ -71,7 +71,7 @@ download_user_images()
   mkdir -p $USER_FOLDER
   cd $USER_FOLDER
 
-  if [ -z ${SKIP_MANUAL_IMAGE_ANNOTATION+x} ]; then
+  if [ ! -z ${SKIP_MANUAL_IMAGE_ANNOTATION+x} ]; then
       echo "Skipping user content download because SKIP_MANUAL_IMAGE_ANNOTATION variable is not set"
       return
   fi
