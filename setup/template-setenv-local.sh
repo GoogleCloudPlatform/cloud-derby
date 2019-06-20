@@ -61,7 +61,7 @@ USE_DEMO_INFERENCE="false"
 DRIVING_CONTROLLER_LOCAL="true"
 
 ### This controls certain automated tasks and allows the script to create resources on behalf of the user
-FOUR_HOURS_HACKATHON="true"
+FOUR_HOURS_HACKATHON="false"
 
 if $FOUR_HOURS_HACKATHON ; then
   AUTO_CREATE_IP="true"
