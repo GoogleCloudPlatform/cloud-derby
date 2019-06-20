@@ -136,10 +136,9 @@ fi
 
 if $DRIVING_CONTROLLER_LOCAL ;
 then
+    echo_my "DRIVING_CONTROLLER_LOCAL='$DRIVING_CONTROLLER_LOCAL' (set it to false to deploy on GCP) - running on local machine (use this for test and dev only)..."
     # The default credentials below are needed for the controller to run locally in unix or mac dev environment when deployed locally
     export GOOGLE_APPLICATION_CREDENTIALS=$SERVICE_ACCOUNT_SECRET
-
-    echo_my "DRIVING_CONTROLLER_LOCAL='$DRIVING_CONTROLLER_LOCAL' (set it to false to deploy on GCP) - running on local machine (use this for test and dev only)..."
     npm start
 else
     generate_yaml
