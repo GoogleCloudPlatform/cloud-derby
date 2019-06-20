@@ -315,7 +315,6 @@ module.exports = class Navigation {
         - Bounding box for the nearest object (may be undefined if object not found)
      ************************************************************/
   findNearestObject(objectType, visionResponse) {
-    // TODO - need to take into account the confidence score of the inference to decide which ball to go after
     console.log("findNearestObject(): Looking for an object of type <" + objectType + ">");
     // At the start, no object of this type is found yet, hence the size is 0
     let foundSize = 0;

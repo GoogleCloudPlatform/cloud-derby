@@ -221,8 +221,6 @@ function callRobotController (number, direction, unitlength, color) {
 
         publishCommand(drivingMessage);
 
-        // TODO - create response
-
         // Resolve the promise with the output text
         console.log(output);
         resolve(output);
