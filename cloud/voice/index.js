@@ -86,7 +86,7 @@ function callVision (vision) {
         console.log(`subscription: ${subscriptionName}`);
 
         console.log("callVision(): vision");
-        global.messages = new Array();
+        global.messages = [];
         console.log('Getting new messages');
         function messageHandler(message){
             global.messages.push(message);
@@ -108,11 +108,10 @@ function callVision (vision) {
                         newestMessage = message.text;
                         newestTime=currentTime;
                         console.log(newestMessage);
-                    };
-        
-          // "Ack" (acknowledge receipt of) the message
+                    }
+                // "Ack" (acknowledge receipt of) the message
                 global.messages[i].ack();
-            };
+            }
             console.log(newestTime);
             console.log(newestMessage);
             resolve(newestMessage);
@@ -145,7 +144,7 @@ function callRobotController (number, direction, unitlength, color) {
         drivingMessage.setOnDemandSensorRate();
         drivingMessage.setModeManual();
 
-        console.log("callRobotController(): color= " + color)
+        console.log("callRobotController(): color= " + color);
         if (color){
             console.log("changing color to : " + color);
             drivingMessage.setColor(color);
@@ -240,7 +239,7 @@ function callRobotController (number, direction, unitlength, color) {
 function publishCommand(command) {
     let txtMessage = JSON.stringify(command);
     txtMessage = txtMessage.replace(/\\/g, "");
-    console.log("pubsub message: " + txtMessage)
+    console.log("pubsub message: " + txtMessage);
     // Only send a message when it is not empty
     if (txtMessage.length > 0) {
         command_topic.publish(txtMessage, (err) => {

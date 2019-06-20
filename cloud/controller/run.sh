@@ -37,13 +37,25 @@ YAML_FILE=app-generated.yml
 ###############################################
 setup_once()
 {
-    echo_my "Downloading 'node'..."
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-    echo_my "Installing 'node'..."
-    sudo apt-get install nodejs
+    if which sw_vers; then
+        echo "MAC OS found"
+        if which node; then
+            echo "node and npm are already installed"
+        else
+            echo "Please install and configure nodeJS as described here: https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/"
+            exit 1
+        fi
+    else
+        lsb_release -a
+        echo "We are running on Linux"
+        echo_my "Downloading 'node'..."
+        curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+        echo_my "Installing 'node'..."
+        sudo apt-get install nodejs
+    fi
+
     node -v
     npm -v
-
     cd js
     echo_my "Installing npm modules..."
     npm install
@@ -71,17 +83,17 @@ runtime: nodejs8
 # env: flex
 
 manual_scaling:
-  instances: 1
+    instances: 1
 
 env_variables:
-  SENSOR_SUBSCRIPTION: $SENSOR_SUBSCRIPTION
-  COMMAND_TOPIC: $COMMAND_TOPIC
-  INFERENCE_USER_NAME: $INFERENCE_USER_NAME
-  INFERENCE_PASSWORD: $INFERENCE_PASSWORD
-  INFERENCE_IP: $INFERENCE_IP
-  INFERENCE_URL: $INFERENCE_URL
-  HTTP_PORT: $HTTP_PORT
-  CAR_ID: $CAR_ID
+    SENSOR_SUBSCRIPTION: $SENSOR_SUBSCRIPTION
+    COMMAND_TOPIC: $COMMAND_TOPIC
+    INFERENCE_USER_NAME: $INFERENCE_USER_NAME
+    INFERENCE_PASSWORD: $INFERENCE_PASSWORD
+    INFERENCE_IP: $INFERENCE_IP
+    INFERENCE_URL: $INFERENCE_URL
+    HTTP_PORT: $HTTP_PORT
+    CAR_ID: $CAR_ID
 EOF
 }
 
@@ -94,12 +106,19 @@ mkdir -p tmp
 CWD=$(pwd)
 # Location where the install flag is set to avoid repeated installs
 INSTALL_FLAG=$CWD/tmp/install.marker
+
 if [ -f "$INSTALL_FLAG" ]; then
     echo_my "File '$INSTALL_FLAG' was found = > no need to do the install since it already has been done."
 else
     setup_once
     touch $INSTALL_FLAG
 fi
+
+# The service account is needed to get permissions to create resources
+gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
+
+# The default credentials below are needed for the controller to run locally in unix or mac dev environment when deployed locally
+export GOOGLE_APPLICATION_CREDENTIALS=$SERVICE_ACCOUNT_SECRET
 
 create_resources
 

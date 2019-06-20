@@ -136,7 +136,7 @@ log_error()
 ###############################################
 start_timer()
 {
-	START_TIME=$(date +%s.%N)
+	START_TIME=$(date +%s)
 }
 
 ###############################################
@@ -144,13 +144,13 @@ start_timer()
 ###############################################
 measure_timer()
 {
-	if [ -z ${START_TIME+x} ]; then
-		MEASURED_TIME=0
-	else
-		END_TIME=$(date +%s.%N)
-		local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
-		MEASURED_TIME=$(printf "%.2f\n" $TIMER)
-	fi
+    if [ -z ${START_TIME+x} ]; then
+        MEASURED_TIME=0
+    else
+        END_TIME=$(date +%s)
+        local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
+        MEASURED_TIME=$(printf "%.2f\n" $TIMER)
+    fi
 }
 
 ###############################################
@@ -219,7 +219,7 @@ echo_my()
 	if [ $ECHO_REQUESTED = $ECHO_DEBUG ]; then PREFIX="${ORANGE}[DEBUG] ${PREFIX}"; fi
 	if [ $ECHO_REQUESTED = $ECHO_NO_PREFIX ]; then PREFIX="${GREEN}"; fi
 
-	measure_timer
+    measure_timer
 	printf "${PREFIX}$1 ($MEASURED_TIME seconds)${NORMAL}\n"
 }
 

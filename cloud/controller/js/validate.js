@@ -38,7 +38,7 @@ const DRIVING_MESSAGE_PARAMS = {
 const DEBUG_MESSAGE_PARAMS = {
   "sendCommand": "send_command",
   "nextSensorMessage": "next_sensor_message"
-}
+};
 
 /************************************************************
   Validate the configuration parameters based of required
@@ -48,7 +48,7 @@ const DEBUG_MESSAGE_PARAMS = {
       - response or next
  ************************************************************/
 module.exports.configParams = function(req, res, next) {
-  var errors = []
+  var errors = [];
 
   // validParams validation
   var valid = false;
@@ -104,7 +104,7 @@ module.exports.configParams = function(req, res, next) {
       - response or next
  ************************************************************/
 module.exports.drivingMessageParams = function(req, res, next) {
-  var errors = []
+  var errors = [];
 
   // validParams validation. We need the keys here
   var valid = false;
@@ -180,7 +180,7 @@ module.exports.drivingMessageParams = function(req, res, next) {
       - response or next
  ************************************************************/
 module.exports.debugMessageParams = function(req, res, next) {
-  var errors = []
+  var errors = [];
 
   // validParams validation. We need the keys here
   var valid = false;
