@@ -121,10 +121,10 @@ module.exports = class Vision {
 
       if (!gcsURI) {
         reject("Error: No gcURI found in sensorMessage");
-        return;
+
       } else if (!gcsURI.startsWith("gs://")) {
         reject("Error: gcsURI must start with gs://");
-        return;
+
       } else {
         // Example request for the inference VM: http://xx.xx.xx.xx:8082/v1/objectInference?gcs_uri=gs%3A%2F%2Fcamera-9-roman-test-oct9%2Fimage1.jpg
         var apiUrl = OBJECT_INFERENCE_API_URL + "?gcs_uri=" + encodeURIComponent(gcsURI);
@@ -143,7 +143,7 @@ module.exports = class Vision {
             console.log("Vision API call took " + (Date.now() - startTime) + " ms. Result: " + body);
             if (response.statusCode != 200) {
               reject("Error: Received  " + response.statusCode + " from API");
-              return;
+
             } else {
               resolve(body);
             }

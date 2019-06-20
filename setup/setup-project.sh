@@ -37,8 +37,8 @@ save_project_id() {
     local PROJECT_ID=$1
 
     if [ -f $PROJECT_NAME_FILE ] ; then
-        local NOW=$(date +%Y-%m-%d.%H:%M:%S)
-        mv $PROJECT_NAME_FILE ${PROJECT_NAME_FILE}.$NOW
+      local NOW=$(date +%Y-%m-%d.%H:%M:%S)
+      mv $PROJECT_NAME_FILE ${PROJECT_NAME_FILE}.$NOW
     fi
 
     echo "export PROJECT=$PROJECT_ID" > $PROJECT_NAME_FILE
@@ -48,7 +48,6 @@ save_project_id() {
 # Generate random project ID
 ##################################################################################
 generate_project_id() {
-    # echo "cloud-derby-$(echo $(date +%s | sha256sum | base64 | head -c 8))" | tr '[:upper:]' '[:lower:]'
     echo "cloud-derby-$(date +%s | sha256sum | base64 | head -c 8)" | tr '[:upper:]' '[:lower:]'
 }
 
@@ -60,15 +59,15 @@ generate_project_id() {
 #############################################
 ask_create_project() {
     if gcloud projects list | grep -q $PROJECT; then
-        # If project already exists, no need to create it
-        echo "false"
+      # If project already exists, no need to create it
+      echo "false"
     else
-        read -p "********************** Do you want to create new project named '$PROJECT'? (y/n)" choice
-        case "$choice" in 
-          y|Y ) echo "true";;
-          n|N ) echo "false";;
-          * ) echo "false";;
-        esac
+      read -p "********************** Do you want to create new project named '$PROJECT'? (y/n)" choice
+      case "$choice" in
+        y|Y ) echo "true";;
+        n|N ) echo "false";;
+        * ) echo "false";;
+      esac
     fi
 }
 
@@ -80,10 +79,10 @@ ask_create_project() {
 #############################################
 ask_create_roles() {
     read -p "********************** Do you want to setup new roles, enable APIs and generate new service account now? (y/n)" choice
-    case "$choice" in 
-      y|Y ) echo "true";;
-      n|N ) echo "false";;
-      * ) echo "false";;
+    case "$choice" in
+    y|Y ) echo "true";;
+    n|N ) echo "false";;
+    * ) echo "false";;
     esac
 }
 
@@ -99,13 +98,13 @@ create_project() {
     local PARENT_FOLDER=1081904530671
 
     if [ ! -d "$TMP" ]; then
-    	mkdir $TMP
-    fi		
-    
-    if [ -f "$TMP/$PROJECT_JSON_REQUEST" ]; then
-        rm -f $TMP/$PROJECT_JSON_REQUEST
+    mkdir $TMP
     fi
-    
+
+    if [ -f "$TMP/$PROJECT_JSON_REQUEST" ]; then
+      rm -f $TMP/$PROJECT_JSON_REQUEST
+    fi
+
     cat << EOF > $TMP/$PROJECT_JSON_REQUEST
 {
     "projectId": "$PROJECT",
@@ -122,7 +121,7 @@ EOF
    
     echo "Obtaining ACCESS_TOKEN for service []account..."
     ACCESS_TOKEN=$(gcloud auth print-access-token)
-    
+
     echo "Creating new project '$PROJECT'..."
     GOOGLE_API_URL="https://cloudresourcemanager.googleapis.com/v1/projects/"
     curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS_TOKEN" -d @${TMP}/${PROJECT_JSON_REQUEST} ${GOOGLE_API_URL}
@@ -133,24 +132,24 @@ EOF
 #############################################
 create_service_account() {
     if gcloud iam service-accounts list --project $PROJECT | grep -q $SERVICE_ACCOUNT; then
-        echo "Service account $SERVICE_ACCOUNT has been found - please go to GCP Console and download the key."
-        return
+      echo "Service account $SERVICE_ACCOUNT has been found - please go to GCP Console and download the key."
+      return
     fi
 
     echo "Creating service account... $ALLMIGHTY_SERVICE_ACCOUNT"
     gcloud iam service-accounts create $SERVICE_ACCOUNT --display-name "Cloud Derby developer service account"
-    
+
     mkdir -p $SERVICE_ACCOUNT_DIR
     if [ -f $SERVICE_ACCOUNT_SECRET ] ; then
-        local NOW=$(date +%Y-%m-%d.%H:%M:%S)
-        mv $SERVICE_ACCOUNT_SECRET ${SERVICE_ACCOUNT_SECRET}.$NOW
+      local NOW=$(date +%Y-%m-%d.%H:%M:%S)
+      mv $SERVICE_ACCOUNT_SECRET ${SERVICE_ACCOUNT_SECRET}.$NOW
     fi
-    
+
     echo "Creating service account keys..."
     gcloud iam service-accounts keys create $SERVICE_ACCOUNT_SECRET --iam-account $ALLMIGHTY_SERVICE_ACCOUNT
-    
+
     local DELAY="3s"
-    
+
     echo "Grant dev role..." && sleep $DELAY
     gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$ALLMIGHTY_SERVICE_ACCOUNT" --role="projects/$PROJECT/roles/$ROLE"
 
@@ -159,13 +158,13 @@ create_service_account() {
 
     echo "Grant GCE admin Admin role..." && sleep $DELAY
     gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$ALLMIGHTY_SERVICE_ACCOUNT" --role="roles/compute.instanceAdmin.v1"
-        
+
     echo "Grant Image User role..." && sleep $DELAY
     gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$ALLMIGHTY_SERVICE_ACCOUNT" --role="roles/compute.imageUser"
-        
+
     echo "Grant Network Admin User role..." && sleep $DELAY
     gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$ALLMIGHTY_SERVICE_ACCOUNT" --role="roles/compute.networkAdmin"
-        
+
     echo "Grant Firewall admin role..." && sleep $DELAY
     gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$ALLMIGHTY_SERVICE_ACCOUNT" --role="roles/compute.securityAdmin"
 }
@@ -175,8 +174,8 @@ create_service_account() {
 #############################################
 create_role() {
     if gcloud beta iam roles list --project $PROJECT | grep -q $ROLE; then
-        echo "Role '$ROLE' already exists."
-        return
+      echo "Role '$ROLE' already exists."
+      return
     fi
 
     echo "Creating a role..."
@@ -257,14 +256,22 @@ storage.objects.get,\
 storage.objects.getIamPolicy,\
 storage.objects.list,\
 storage.objects.setIamPolicy,\
-storage.objects.update"
+storage.objects.update,\
+clouddebugger.breakpoints.create,\
+clouddebugger.breakpoints.delete,\
+clouddebugger.breakpoints.get,\
+clouddebugger.breakpoints.list,\
+clouddebugger.breakpoints.listActive,\
+clouddebugger.breakpoints.update,\
+clouddebugger.debuggees.create,\
+clouddebugger.debuggees.list"
 
     gcloud beta iam roles create $ROLE \
-        --project $PROJECT \
-        --title "Cloud Derby Developer Role" \
-        --description "Access to resources needed to develop and deploy Cloud Derby" \
-        --stage "GA" \
-        --permissions $PERMISSIONS
+      --project $PROJECT \
+      --title "Cloud Derby Developer Role" \
+      --description "Access to resources needed to develop and deploy Cloud Derby" \
+      --stage "GA" \
+      --permissions $PERMISSIONS
 }
 
 #############################################
@@ -299,16 +306,15 @@ install_gcp_sdk() {
 #############################################
 enable_project_apis() {
     APIS="ml.googleapis.com \
-        pubsub.googleapis.com \
-        storage-component.googleapis.com \
-        storage-api.googleapis.com \
-        compute.googleapis.com \
-        appengineflex.googleapis.com \
-        appengine.googleapis.com \
-        cloudresourcemanager.googleapis.com \
-        servicemanagement.googleapis.com \
-        sourcerepo.googleapis.com \
-        cloudiot.googleapis.com"
+      pubsub.googleapis.com \
+      storage-component.googleapis.com \
+      storage-api.googleapis.com \
+      compute.googleapis.com \
+      appengine.googleapis.com \
+      cloudresourcemanager.googleapis.com \
+      cloudiot.googleapis.com"
+
+    #      appengineflex.googleapis.com \
 
     echo "Enabling APIs on the project..."
     gcloud services enable $APIS --async
@@ -318,12 +324,12 @@ enable_project_apis() {
 # Create AppEngine App for the project
 #############################################
 create_appengine_app() {
-    if gcloud app describe 2>&1 >/dev/null | grep 'does not contain an App Engine application' > /dev/null; then
-        echo "GAE Default App not found - initializing AppEngines on the project..."
-        gcloud app create --region=$REGION_LEGACY
-    else
-        echo "GAE Default App already exists, skipping this step."
-    fi
+  if gcloud app describe 2>&1 >/dev/null | grep 'does not contain an App Engine application' > /dev/null; then
+      echo "GAE Default App not found - initializing AppEngines on the project..."
+      gcloud app create --region=$REGION_LEGACY
+  else
+      echo "GAE Default App already exists, skipping this step."
+  fi
 }
 
 #############################################
@@ -347,13 +353,26 @@ mkdir -p tmp
 INSTALL_FLAG=tmp/install.marker
 if [ -f "$INSTALL_FLAG" ]; then
     echo "File '$INSTALL_FLAG' was found = > no need to do the install since it already has been done."
-else    
-    yes | sudo apt-get update
-    yes | sudo apt-get --assume-yes install bc
-    yes | sudo apt-get install apt-transport-https unzip zip
-    echo "Checking whether we need to install gcloud..."
-    command -v gcloud >/dev/null 2>&1 || { echo >&2 "'gcloud' is not installed."; install_gcp_sdk ; }
-    # if lsb_release -i | grep -q Raspbian; then echo "Installing Startup Scripts for Car"; install_startup_scripts; fi;
+else
+    if which sw_vers; then
+        echo "MAC OS found"
+        if which gcloud; then
+            echo "gcloud is already installed"
+        else
+            echo "Please install and configure gcloud SDK as described here: https://cloud.google.com/sdk/docs/quickstart-macos"
+            exit 1
+        fi
+    else
+        lsb_release -a
+        echo "We are running on Linux"
+        yes | sudo apt-get update
+        yes | sudo apt-get --assume-yes install bc
+        yes | sudo apt-get install apt-transport-https unzip zip
+        echo "Checking whether we need to install gcloud..."
+        command -v gcloud >/dev/null 2>&1 || { echo >&2 "'gcloud' is not installed."; install_gcp_sdk ; }
+        # if lsb_release -i | grep -q Raspbian; then echo "Installing Startup Scripts for Car"; install_startup_scripts; fi;
+    fi
+
     touch $INSTALL_FLAG
 fi
 
@@ -374,7 +393,7 @@ if ! [ -f $HOME/setenv-local.sh ] ; then
     cp ./template-setenv-local.sh $HOME/setenv-local.sh
 fi
 
-source $HOME/setenv-local.sh
+source ../setenv-global.sh
 
 gcloud config set compute/region $REGION
 gcloud config set compute/zone $ZONE

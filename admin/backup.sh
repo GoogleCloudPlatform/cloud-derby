@@ -69,9 +69,9 @@ backup_source() {
     mkdir -p $TMP
 
     # Clone the repo into a temp directory
-    git clone ${GITHUB_REPO_URL} $TMP/$SOURCE_FOLDER
+    git clone https://github.com/GoogleCloudPlatform/cloud-derby $TMP/cloud-derby-source
 
-    cd $TMP/$SOURCE_FOLDER
+    cd $TMP/cloud-derby-source
 
     # We only need to save source files, not the large amount of git metadata
     rm -rf .git

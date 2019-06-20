@@ -34,11 +34,11 @@ create_static_inference_ip()
   if gcloud compute addresses list | grep $ML_IP_NAME; then
     echo_my "Static IP address $ML_IP_NAME found OK"
   else
-      if $FAST_PATH ; then
+      if [ ! -z ${AUTO_CREATE_IP+x} ]; then
           echo "Creating static external IP for ML VM... '$ML_IP_NAME'"
           gcloud compute addresses create $ML_IP_NAME --region $REGION
       else
-          echo "Skipping creation of static IP because FAST_PATH variable is set to FALSE"
+          echo "Skipping automatic creation of static IP because AUTO_CREATE_IP variable is not set"
       fi
   fi
 }
@@ -89,8 +89,10 @@ remote_copy()
 configure_firewall()
 {
   # Only configure firewall if we are in automatic "fast path" mode - aka users are not creating these things by hand
-  if $FAST_PATH ; then
+  if [ ! -z ${AUTO_CREATE_FIREWALL+x} ]; then
       open_http_firewall_port $HTTP_PORT
+  else
+      echo "Skipping automatic creation of firewall because AUTO_CREATE_FIREWALL variable is not set"
   fi
 
   # Deep Learning VM has pre-installed Python Lab on port 8080
@@ -170,21 +172,21 @@ create_gpu_vm()
   echo_my "List of my instances..."
   gcloud compute --project="$PROJECT" instances list
 
-  echo_my "Copy basic project files to the VM so it is easier to clone the repo later..."
-  local LOCAL_DIR=$TMP/host-files
-  rm -rf $LOCAL_DIR | true # ignore if it does not exist
-  mkdir -p $LOCAL_DIR
+  # echo_my "Copy basic project files to the VM so it is easier to clone the repo later..."
+  # local LOCAL_DIR=$TMP/host-files
+  # rm -rf $LOCAL_DIR | true # ignore if it does not exist
+  # mkdir -p $LOCAL_DIR
 
   # Dynamicaly generate correct scripts so we can copy those scripts to the remote VM
-  echo "source setenv-local.sh" > $LOCAL_DIR/clone-repo.sh
+  # echo "source setenv-local.sh" > $LOCAL_DIR/clone-repo.sh
 
   # Note that we want $PROJECT_PATH to be written as such and not substituted with a real value, hence the escape character \ before $
-  echo "git clone $GITHUB_REPO_URL \$PROJECT_PATH" >> $LOCAL_DIR/clone-repo.sh
+  # echo "git clone $GITHUB_REPO_URL \$PROJECT_PATH" >> $LOCAL_DIR/clone-repo.sh
 
-  cp $HOME/setenv-local.sh $LOCAL_DIR
-  chmod u+x $LOCAL_DIR/*.sh
-  REMOTE_DIR="~/"
-  remote_copy $LOCAL_DIR $REMOTE_DIR $ZONE $VM_NAME
+  # cp $HOME/setenv-local.sh $LOCAL_DIR
+  # chmod u+x $LOCAL_DIR/*.sh
+  # REMOTE_DIR="~/"
+  # remote_copy $LOCAL_DIR $REMOTE_DIR $ZONE $VM_NAME
 }
 
 #############################################

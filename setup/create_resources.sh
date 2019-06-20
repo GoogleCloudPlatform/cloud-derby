@@ -25,6 +25,9 @@ set -e # Exit if error is detected during pipeline execution
 
 source ./setenv-global.sh
 
-gcloud auth login
+# The service account is needed to get permissions to create resources
+gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
+
+#gcloud auth login
 
 create_resources

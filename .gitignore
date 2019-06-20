@@ -3,6 +3,7 @@
 **/node_modules
 **/target
 **/tmp
+**/.idea
 **/*.pem
 **/*.log
 **/log.txt

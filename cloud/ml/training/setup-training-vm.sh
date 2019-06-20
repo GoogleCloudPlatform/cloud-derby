@@ -84,10 +84,6 @@ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 yes | sudo apt-get update
 yes | sudo apt-get --assume-yes install bc
 yes | sudo apt-get install apt-transport-https unzip zip
-# Experimental - TODO
-# sudo apt-get install python-lxml
-# pip install Pillow
-# pip install matplotlib
 
 source ./setenv.sh
 print_header "Setting up TF VM for transferred learning"

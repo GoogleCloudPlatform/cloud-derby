@@ -315,7 +315,6 @@ module.exports = class Navigation {
         - Bounding box for the nearest object (may be undefined if object not found)
      ************************************************************/
   findNearestObject(objectType, visionResponse) {
-    // TODO - need to take into account the confidence score of the inference to decide which ball to go after
     console.log("findNearestObject(): Looking for an object of type <" + objectType + ">");
     // At the start, no object of this type is found yet, hence the size is 0
     let foundSize = 0;
@@ -380,9 +379,9 @@ module.exports = class Navigation {
     // At this distance or closer we need to be moving slow not to kick the ball out too far
     const slowApproachZoneMm = 300;
     // We can grasp the ball within this angle spread to each side
-    const ballCaptureAngle = 10;
+    const ballCaptureAngle = 11;
     // This is how far the car will drive super slowly to make sure ball is really in the gripper
-    const EXTRA_DISTANCE = 30;
+    const EXTRA_DISTANCE = 40;
 
     if (Math.abs(angle) <= ballCaptureAngle && distance <= ballCaptureDistanceMm) {
       // If we came here second time after gripping the ball, this means we really have it in the gripper and can now go to the base
@@ -416,7 +415,7 @@ module.exports = class Navigation {
       // Always drive extre few cm to make sure we have the ball in the gripper
       distance = distance + EXTRA_DISTANCE;
     } else if (obstacleFound) {
-      console.log("calculateBallDirections(): these aren't the droids you're looking for. navigating around the obstacle");
+      console.log("calculateBallDirections(): these aren't the droids you're looking for. Navigating around the obstacle...");
       return this.ballSearchStrategy();
     } else {
       console.log("calculateBallDirections(): ball is either too far or is not aligned by angle.");

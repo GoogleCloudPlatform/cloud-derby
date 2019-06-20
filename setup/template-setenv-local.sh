@@ -29,11 +29,9 @@ set -e # Exit if error is detected during pipeline execution
 
 echo "setenv-local.sh: start..."
 
-### Project user home dir
-export BASE_PATH="$HOME"
-
 ### Automatically generate unique project ID for the first run and save it into a file. Later read it from file
-export PROJECT_NAME_FILE="$HOME/project-id.sh"
+BASE_PATH="$HOME"
+PROJECT_NAME_FILE="$BASE_PATH/project-id.sh"
 
 if [ -f "$PROJECT_NAME_FILE" ] ; then
     echo "Sourcing existing project file '$PROJECT_NAME_FILE'..."
@@ -46,62 +44,37 @@ fi
 echo "PROJECT='$PROJECT'"
 gcloud config set project "$PROJECT"
 
-### This controls logic for the 4 hours event vs 8 hrs and makes some other assumptions
-#   true - we are currently doing 4 hours event and will automatically create some resources for the user
-#   false - we are doing 8 hours event and have users do many things by hand
-#		set this to "true" if you want to use the demo inference VM
-export FOUR_HOURS_EVENT="false"
-export DEMO_PROJECT="robot-derby-demo-1"
-export DEMO_INFERENCE_IP_NAME="ml-static-ip-47"
+### Serial number of the car to distinguish it from all other cars possibly on the same project
+export CAR_ID=2
 
-### This controls many automated tasks and allows the script to create many resources
-#   automatically or let  user create it by hand. For example - creation of static IP address for inference VM, firewall rules, etc.
-#   true - create resources automatically
-#   false - let user create resources manually (for example - during 8 hours event)
-export FAST_PATH="false"
+### How many training steps to take during TensorFlow model training
+TRAINING_STEPS=8000
+
+### This controls which inference VM REST API will be used by the Driving Controller
+#   true - use existing inference VM from the DEMO project
+#   false - use inference VM within the same project as Driving Controller
+USE_DEMO_INFERENCE="false"
 
 ### Where do we want Driving Controller to be deployed? (current VM or App Engine)
 #   true - deploy in local VM
 #   false - deploy in App Engine
-DEPLOY_LOCAL="true"
+DRIVING_CONTROLLER_LOCAL="true"
 
-### Serial number of the car to distinguish it from all other cars possibly on the same project
-export CAR_ID=2
+### This controls certain automated tasks and allows the script to create resources on behalf of the user
+FOUR_HOURS_HACKATHON="false"
 
-### Used for cases when we want multiple ML models to be deployed and compared against each other
+if $FOUR_HOURS_HACKATHON ; then
+  AUTO_CREATE_IP="true"
+  AUTO_CREATE_FIREWALL="true"
+  SKIP_MANUAL_IMAGE_ANNOTATION="true"
+fi
+
+### Used for multiple ML models to be deployed and compared against each other (this is added to VM names, IP names, GCS bucket names, etc.)
 export VERSION=50
-
-### How many training steps to take
-TRAINING_STEPS=8000
 
 ### These are Region and Zone where you want to run your car controller - feel free to change as you see fit
 export REGION="us-central1"
 export ZONE="us-central1-f"
 export REGION_LEGACY="us-central" # there are corner cases where gcloud still references the legacy nomenclature
-
-### Camera resolution
-export HORIZONTAL_RESOLUTION_PIXELS=1024
-export VERTICAL_RESOLUTION_PIXELS=576
-
-### GitHub Repo with the source code
-export GITHUB_REPO_URL="https://github.com/GoogleCloudPlatform/cloud-derby"
-
-### Name of the folder with the source code (not a full path)
-export SOURCE_FOLDER="cloud-derby"
-
-### Git Repo will be cloned into this directory
-export PROJECT_PATH="$BASE_PATH/$SOURCE_FOLDER"
-
-### Store service account private key here
-export SERVICE_ACCOUNT_DIR="$BASE_PATH/.secrets"
-export SERVICE_ACCOUNT_SECRET="$SERVICE_ACCOUNT_DIR/service-account-secret.json"
-export SERVICE_ACCOUNT="cloud-derby-dev"
-export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
-
-### Name of the source bucket with images of colored balls (this is one source for all other projects)
-export GCS_SOURCE_IMAGES="cloud-derby-pictures"
-
-### Name of the destination bucket with images of colored balls and whatever other objects
-export GCS_IMAGES="${PROJECT}-images-for-training-v-${VERSION}"
 
 echo "setenv-local.sh: done"

@@ -29,9 +29,9 @@ echo "setenv.sh: start..."
 source ../setenv-global.sh
 
 ### Billing accound ID used to pay for project resources
-export BILLING_ACCOUNT_ID="<set your Billing ID here>"
+BILLING_ACCOUNT_ID="<set your Billing ID here>"
 
 ### This is the project that hosts reference images and other admin elements
-export ADMIN_PROJECT_ID="administration-203923"
+ADMIN_PROJECT_ID="administration-203923"
 
 echo "setenv.sh: done"

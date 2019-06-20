@@ -24,8 +24,8 @@ const BUCKET = process.env.CAR_CAMERA_BUCKET; // Bucket where images will be upl
 const TOPIC = process.env.SENSOR_TOPIC; // Where to post messages
 const ITERATIONS = process.env.NUM_ITERATIONS; // How many messages to send
 const THINK_TIME = process.env.DELAY; // How long to wait between sending simulated messages to the topic
-const TEST_IMAGE_FILE = process.env.TEST_IMAGE_FILE // If this is specified, it will be the only file to be tested
-const CAR_ID = process.env.CAR_ID
+const TEST_IMAGE_FILE = process.env.TEST_IMAGE_FILE; // If this is specified, it will be the only file to be tested
+const CAR_ID = process.env.CAR_ID;
 
 // Simulated messages content
 let data = [

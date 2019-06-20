@@ -28,6 +28,26 @@ source $HOME/setenv-local.sh
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
+### Camera resolution
+export HORIZONTAL_RESOLUTION_PIXELS=1024
+export VERTICAL_RESOLUTION_PIXELS=576
+
+### Demo project with the inference VM running at all times for use by anyone
+export DEMO_PROJECT="robot-derby-demo-1"
+export DEMO_INFERENCE_IP_NAME="ml-static-ip-47"
+
+### Name of the source bucket with images of colored balls (this is one source for all other projects)
+export GCS_SOURCE_IMAGES="cloud-derby-pictures"
+
+### Name of the destination bucket with images of colored balls and whatever other objects
+export GCS_IMAGES="${PROJECT}-images-for-training-v-${VERSION}"
+
+### Store service account private key here
+export SERVICE_ACCOUNT_DIR="$BASE_PATH/.secrets"
+export SERVICE_ACCOUNT_SECRET="$SERVICE_ACCOUNT_DIR/service-account-secret.json"
+export SERVICE_ACCOUNT="cloud-derby-dev"
+export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
+
 ### Topic where cloud logic sends driving commands to and car reads them from here
 export COMMAND_TOPIC=driving-commands-topic-$CAR_ID
 
@@ -45,9 +65,6 @@ export IOT_CORE_REGISTRY=car-iot-registry
 
 ### IOT Core Device ID
 export IOT_CORE_DEVICE_ID=iot-car-$CAR_ID
-
-### Name of the VM that runs inference and serves prediction requests
-# export INFERENCE_VM=ml-inference-$VERSION
 
 ### Inference IP address logical name
 export ML_IP_NAME=ml-static-ip-$VERSION
@@ -119,7 +136,7 @@ log_error()
 ###############################################
 start_timer()
 {
-	START_TIME=$(date +%s.%N)
+	START_TIME=$(date +%s)
 }
 
 ###############################################
@@ -127,13 +144,13 @@ start_timer()
 ###############################################
 measure_timer()
 {
-	if [ -z ${START_TIME+x} ]; then
-		MEASURED_TIME=0
-	else
-		END_TIME=$(date +%s.%N)
-		local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
-		MEASURED_TIME=$(printf "%.2f\n" $TIMER)
-	fi
+    if [ -z ${START_TIME+x} ]; then
+        MEASURED_TIME=0
+    else
+        END_TIME=$(date +%s)
+        local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
+        MEASURED_TIME=$(printf "%.2f\n" $TIMER)
+    fi
 }
 
 ###############################################
@@ -202,7 +219,7 @@ echo_my()
 	if [ $ECHO_REQUESTED = $ECHO_DEBUG ]; then PREFIX="${ORANGE}[DEBUG] ${PREFIX}"; fi
 	if [ $ECHO_REQUESTED = $ECHO_NO_PREFIX ]; then PREFIX="${GREEN}"; fi
 
-	measure_timer
+    measure_timer
 	printf "${PREFIX}$1 ($MEASURED_TIME seconds)${NORMAL}\n"
 }
 
