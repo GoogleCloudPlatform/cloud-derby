@@ -117,9 +117,6 @@ fi
 # The service account is needed to get permissions to create resources
 gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
 
-# The default credentials below are needed for the controller to run locally in unix or mac dev environment when deployed locally
-export GOOGLE_APPLICATION_CREDENTIALS=$SERVICE_ACCOUNT_SECRET
-
 create_resources
 
 # Lookup actual IP address for inference VM from the static reference
@@ -139,6 +136,9 @@ fi
 
 if $DRIVING_CONTROLLER_LOCAL ;
 then
+    # The default credentials below are needed for the controller to run locally in unix or mac dev environment when deployed locally
+    export GOOGLE_APPLICATION_CREDENTIALS=$SERVICE_ACCOUNT_SECRET
+
     echo_my "DRIVING_CONTROLLER_LOCAL='$DRIVING_CONTROLLER_LOCAL' (set it to false to deploy on GCP) - running on local machine (use this for test and dev only)..."
     npm start
 else
