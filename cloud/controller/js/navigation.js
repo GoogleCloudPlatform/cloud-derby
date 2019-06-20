@@ -27,13 +27,16 @@ const SEEK_HOME_TURN = require('./drive-message').SEEK_HOME_TURN;
 var DriveMessageSimulator = require('./simulation').DriveMessageSimulator;
 let driveSimulation = new DriveMessageSimulator();
 const TURN_SPEED = Settings.MAX_SPEED / 10;
-// Many GoPiGo motors are driving at different speed causing left and right motor to skew the car when driven at max, hence we reduce the max speed
+// Many GoPiGo motors are driving at different speed causing left and right motor to skew the car when driven at max,
+// hence we reduce the max speed
 const DRIVE_SPEED = Settings.MAX_SPEED / 3;
 
-// Highest allowed Y coordinate of the top of the ball in the picture - if it is above this, we will discard the image as false positive for low confidence result
-// because balls should not fly in the air. Note that the coordinates of (0,0) are in the top left corner
+// Highest allowed Y coordinate of the top of the ball in the picture - if it is above this, we will discard the image
+// as false positive for low confidence result because balls should not fly in the air. Note that the coordinates of
+// (0,0) are in the top left corner
 const HIGH_BALL_TOP_BOUND = 0.1;
-// Even if the ball is very high and if the inference confidence score is higher than this, we will still accept this as a real ball
+// Even if the ball is very high and if the inference confidence score is higher than this, we will still accept this
+// as a real ball
 const HIGH_BALL_SCORE = 0.95;
 // Ignore all Home Base objects if confidence score is lower than this below
 const HOME_BASE_SCORE = 0.3;
@@ -55,12 +58,15 @@ module.exports = class Navigation {
    Output:
    - driving message command to be sent to the car
    Example input:
-   {"carId":1,"cloudTimestampMs":1519671071945,"carState":{"ballsCollected":0,"color":"red","batteryLeft":99},"sensors":{"frontLaserDistanceMm":90,"frontCameraImagePath":"https://storage.googleapis.com/camera-2-robot-derby-ndg3njzh/image2018-05-27025001.151062.jpg","frontCameraImagePathGCS":"gs://robot-derby-camera-1/images/image0.jpg"}}
+   {"carId":1,"cloudTimestampMs":1519671071945,"carState":{"ballsCollected":0,"color":"red","batteryLeft":99},
+   "sensors":{"frontLaserDistanceMm":90,
+   "frontCameraImagePath":"https://storage.googleapis.com/camera-2-robot-derby-ndg3njzh/image2018-05-27025001.151062.jpg",
+   "frontCameraImagePathGCS":"gs://robot-derby-camera-1/images/image0.jpg"}}
    ************************************************************/
   nextMove(sensorMessage) {
     return Promise.resolve()
     .then(() => {
-      console.log("nextMove(): Car has " + sensorMessage.carState.ballsCollected + " balls onboard.");
+      console.log("nextMove(): Car has " + sensorMessage.carState.ballsCollected + " balls on-board.");
       
       if ((this.countGoals(GO2BASE) > 0) || (this.countGoals(SEEK_HOME_TURN) > 0)) {
         console.log("nextMove(): looking for the home base");
@@ -208,8 +214,8 @@ module.exports = class Navigation {
    formulate strategy to move the car to ball appears in the frame in the future
    Input:
    - list of object bounding boxes found by Object Detection
-   Ouput:
-   - Driving commands for car to execute in pusuit of search for the ball
+   Output:
+   - Driving commands for car to execute in pursuit of search for the ball
    ************************************************************/
   ballSearchStrategy() {
     console.log("ballSearchStrategy(): Object was not in the frame");
@@ -252,8 +258,8 @@ module.exports = class Navigation {
    formulate strategy to find the home base
    Input:
    - list of object bounding boxes found by Object Detection
-   Ouput:
-   - Driving commands for car to execute in pusuit of search for the object
+   Output:
+   - Driving commands for car to execute in pursuit of search for the object
    ************************************************************/
   homeSearchStrategy() {
     console.log("homeSearchStrategy(): Home base was not in the frame");
@@ -291,7 +297,7 @@ module.exports = class Navigation {
    sequential Ball Seeking turns without movement.
    Input:
    - Goal to search for
-   Ouput:
+   Output:
    - Number 0 to N - how many sequential turns
    ************************************************************/
   countGoals(goal) {
@@ -312,7 +318,7 @@ module.exports = class Navigation {
    Input:
    - object label
    - list of object bounding boxes found by Object Detection
-   Ouput:
+   Output:
    - Bounding box for the nearest object (may be undefined if object not found)
    ************************************************************/
   findNearestObject(objectType, visionResponse) {
@@ -321,27 +327,36 @@ module.exports = class Navigation {
     let foundSize = 0;
     let nearestObject = undefined;
     
-    // Iterate over all of the bjects in the list and find and compare all of the needed type
-    for (var i = visionResponse.bBoxes.length; i--;) {
+    // Iterate over all of the objects in the list and find and compare all of the needed type
+    for (let i = visionResponse.bBoxes.length; i--;) {
       let obj = visionResponse.bBoxes[i];
       console.log("findNearestObject(): Considering object type <" + obj.label + ">");
       
       // Is this the right object type?
       if (obj.label.toLocaleLowerCase().indexOf(objectType.toLowerCase()) >= 0) {
         
-        // For object type of "ball" its upper border should never be above certain heigh of the image with low confidence score
-        if ((obj.label.toLocaleLowerCase().indexOf(Settings.BALL_LABEL_SUFFIX.toLocaleLowerCase()) >= 0) & (obj.score < HIGH_BALL_SCORE) & (obj.y < HIGH_BALL_TOP_BOUND)) {
-          console.log("findNearestObject(): likely a false positive for the ball - either the confidence score of " + obj.score + "is below threshold of " + HIGH_BALL_SCORE + " or upper boundary of the ball being " + obj.y + " above threshold of " + HIGH_BALL_TOP_BOUND);
+        // For object type of "ball" its upper border should never be above certain height of the image with low
+        // confidence score
+        
+        if (obj.label.toLocaleLowerCase().indexOf(Settings.BALL_LABEL_SUFFIX.toLocaleLowerCase()) >= 0 &&
+          obj.score < HIGH_BALL_SCORE && obj.y < HIGH_BALL_TOP_BOUND) {
+          console.log("findNearestObject(): likely a false positive for the ball - either the confidence score of " +
+            obj.score + "is below threshold of " + HIGH_BALL_SCORE + " or upper boundary of the ball being " + obj.y +
+            " above threshold of " + HIGH_BALL_TOP_BOUND);
           continue;
         }
         
-        // For object type of "home_base" the confidence score is higher because of poor training results - and resulting many false positives
-        if ((obj.label.toLocaleLowerCase().indexOf(Settings.HOME_LABEL_SUFFIX.toLocaleLowerCase()) >= 0) & (obj.score < HOME_BASE_SCORE)) {
-          console.log("findNearestObject(): likely a false positive for home base - the confidence score of " + obj.score + "is below threshold of " + HIGH_BALL_SCORE);
+        // For object type of "home_base" the confidence score is higher because of poor training results - and
+        // resulting many false positives
+        if ((obj.label.toLocaleLowerCase().indexOf(Settings.HOME_LABEL_SUFFIX.toLocaleLowerCase()) >= 0) &&
+          (obj.score < HOME_BASE_SCORE)) {
+          console.log("findNearestObject(): likely a false positive for home base - the confidence score of " +
+            obj.score + "is below threshold of " + HIGH_BALL_SCORE);
           continue;
         }
         
-        // Consider the largest size - vertical or horizontal (object may be covered partially) - and multiply this by the confidence score
+        // Consider the largest size - vertical or horizontal (object may be covered partially) - and multiply this by
+        // the confidence score
         let thisSize = Math.max(obj.w, obj.h) * obj.score;
         // Is current object bigger and more likely than the one found earlier?
         if (foundSize < thisSize) {
@@ -360,7 +375,7 @@ module.exports = class Navigation {
    Input:
    - bBox - bounding box with coordinates of the nearest ball
    - obstacleFound - did we detect an obstacle
-   Ouput:
+   Output:
    - Initialized command object with sequence of actions/directions
    ************************************************************/
   calculateBallDirections(bBox, obstacleFound) {
@@ -383,7 +398,8 @@ module.exports = class Navigation {
     const EXTRA_DISTANCE = 40;
     
     if (Math.abs(angle) <= ballCaptureAngle && distance <= ballCaptureDistanceMm) {
-      // If we came here second time after gripping the ball, this means we really have it in the gripper and can now go to the base
+      // If we came here second time after gripping the ball, this means we really have it in the gripper and can now
+      // go to the base
       if (this.commandHistory[this.commandHistory.length - 1].goal == CHECK_GRIP) {
         command.setGoalGo2Base();
         return command;
@@ -391,7 +407,8 @@ module.exports = class Navigation {
       // We are close enough and at the proper angle so that we can capture the ball (yay!)
       console.log("calculateBallDirections(): initiate ball capture protocol");
       command.gripperClose();
-      // We set the goal to check grip so that we come into this second time we know what we wanted to do - see code above
+      // We set the goal to check grip so that we come into this second time we know what we wanted to do - see code
+      // above
       command.setGoalCheck4Grip();
       // Drive backwards so we can make sure next time we still have the ball in the grip
       command.setSpeed(DRIVE_SPEED);
@@ -411,7 +428,7 @@ module.exports = class Navigation {
       command.gripperOpen();
       // Last part of the journey we need to slow down as to not kick the ball away
       speed = Settings.MAX_SPEED * 0.05;
-      // Always drive extre few cm to make sure we have the ball in the gripper
+      // Always drive extra few cm to make sure we have the ball in the gripper
       distance = distance + EXTRA_DISTANCE;
     } else if (obstacleFound) {
       console.log("calculateBallDirections(): these aren't the droids you're looking for. Navigating around the obstacle...");
@@ -432,7 +449,7 @@ module.exports = class Navigation {
    Calculates sequence of directions to the specified ball as defined by the bounding box
    Input:
    - bBox - bounding box with coordinates of the nearest ball
-   Ouput:
+   Output:
    - Initialized command object with sequence of actions/directions
    ************************************************************/
   calculateHomeDirections(bBox, obstacleFound) {
@@ -456,7 +473,8 @@ module.exports = class Navigation {
       command.drive(-1000);
       command.setSpeed(TURN_SPEED);
       command.turnRight(90);
-      // After we release the ball and go back for more, we want to do all the driving with a closed gripper to prevent random balls from getting into the grip
+      // After we release the ball and go back for more, we want to do all the driving with a closed gripper to prevent
+      // random balls from getting into the grip
       command.gripperClose();
       command.setGoalGo2Ball();
       return command;
@@ -482,7 +500,7 @@ module.exports = class Navigation {
    Input:
    - Coordinates of the object
    - Image metadata with info about the dimensions of the image
-   Ouput:
+   Output:
    - Angle where the object is located - positive means turn right, negative is turn left
    ************************************************************/
   findAngle(bBox) {
@@ -501,7 +519,6 @@ module.exports = class Navigation {
     // let angle = (Settings.camera.H_FIELD_OF_VIEW / 2) *
     //   (offsetPixels / (Settings.camera.HORIZONTAL_RESOLUTION_PIXELS / 2));
     
-    
     // -------- This is using relative coordinates
     // console.log("findAngle(): Settings.camera.H_FIELD_OF_VIEW=" + parseFloat(Settings.camera.H_FIELD_OF_VIEW));
     let angle = (centerX - 0.5) * parseFloat(Settings.camera.H_FIELD_OF_VIEW) * ANGLE_CALIBRATION_MULTIPLIER;
@@ -515,19 +532,19 @@ module.exports = class Navigation {
    Input:
    - bounding box with the dimensions of the image
    - Vertical Object size
-   Ouput:
+   Output:
    - Distance to the object in mm
    ************************************************************/
   findDistanceMM(bBox, realObjectVerticalSizeMm) {
-    // Calibration constant - this is used to adjust and calibrate distance calculation based on specifics of camera, ball, etc.
-    const CALIBRATION_MULTIPLIER = 1;
-    const CALIBRATION_ADDON_MM = 0;
+    // Calibration constant - this is used to adjust and calibrate distance calculation based on specifics of camera,
+    // ball, etc. const CALIBRATION_MULTIPLIER = 1; const CALIBRATION_ADDON_MM = 0;
     
     // Since we are navigating to round balls - use the largest dimension (ball can be only partially visible)
     let relative_object_size = Math.max(bBox.h, bBox.w);
     
     // This uses relative coordinates - 0 to 1 relative to the overall image size
-    let distanceMM = (Settings.camera.FOCAL_LENGTH_MM * realObjectVerticalSizeMm / (relative_object_size * Settings.camera.SENSOR_HEIGHT_MM)) - Settings.MIN_DISTANCE_TO_CAMERA_MM;
+    let distanceMM = (Settings.camera.FOCAL_LENGTH_MM * realObjectVerticalSizeMm /
+      (relative_object_size * Settings.camera.SENSOR_HEIGHT_MM)) - Settings.MIN_DISTANCE_TO_CAMERA_MM;
     
     console.log("findDistance(): Calculated: " + distanceMM.toFixed(0) + " mm");
     // This part below really should have been done by non-linear regression, but as a hack do it manually for now
