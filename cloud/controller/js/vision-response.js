@@ -1,6 +1,6 @@
 /**
  * Copyright 2018, Google, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,16 +17,16 @@
 'use strict';
 
 /************************************************************
-  This object is the response from the Vision.class and
-  contains resulting data from Object Detection API
+ This object is the response from the Vision.class and
+ contains resulting data from Object Detection API
  ************************************************************/
 module.exports = class VisionResponse {
-
+  
   constructor() {
     // List of bounding boxes for objects found by Object Detection
     this.bBoxes = [];
   }
-
+  
   addBox(boundingBox) {
     this.bBoxes.push(boundingBox);
   }

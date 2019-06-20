@@ -18,21 +18,20 @@
 var DriveMessage = require('./drive-message').DriveMessage;
 
 /************************************************************
-  Display Manual Driving form on Get
-  Input:
-    - inboundMsgHistory
+ Display Manual Driving form on Get
+ Input:
+ - inboundMsgHistory
  ************************************************************/
-module.exports.manualDrivingForm = function(inboundMsgHistory) {
+module.exports.manualDrivingForm = function (inboundMsgHistory) {
   let imageUrl;
-
+  
   if (inboundMsgHistory.length > 0) {
     let msg = inboundMsgHistory[inboundMsgHistory.length - 1];
-    if ((!(msg.data === undefined)) && (!(JSON.parse(msg.data).sensors === undefined)) &&
-      (!(JSON.parse(msg.data).sensors.frontCameraImagePath === undefined))) {
+    if ((!(msg.data === undefined)) && (!(JSON.parse(msg.data).sensors === undefined)) && (!(JSON.parse(msg.data).sensors.frontCameraImagePath === undefined))) {
       imageUrl = JSON.parse(msg.data).sensors.frontCameraImagePath;
     }
   }
-
+  
   let form = `<a href="/">Home</a> / <a href="/manual_mode">Refresh page</a>
     <h1>Manual car control</h1>
     <form action="/manual_control_action" method="post">
@@ -62,58 +61,58 @@ module.exports.manualDrivingForm = function(inboundMsgHistory) {
     <br><br>
     <input type="submit" value="Send control message to the car">
 </form>`;
-
+  
   // Add an image to the form
   if (!(imageUrl === undefined)) {
     form = form + '<img src="' + imageUrl + '" alt="picture of the ball" style="width:600px;"/>';
   }
-
+  
   return form;
 };
 
 /************************************************************
-  Send manual driving command to the car
+ Send manual driving command to the car
  ************************************************************/
-module.exports.manualCommand = function(req) {
+module.exports.manualCommand = function (req) {
   let command = new DriveMessage();
-
+  
   command.setModeManual();
-
+  
   if (req.body.turn_speed_field) {
     command.setSpeed(req.body.turn_speed_field);
   }
-
+  
   if (req.body.angle_field) {
     command.makeTurn(req.body.angle_field);
   }
-
+  
   if (req.body.drive_speed_field) {
     command.setSpeed(req.body.drive_speed_field);
   }
-
+  
   if (req.body.distance_field) {
     command.drive(req.body.distance_field);
   }
-
+  
   if (req.body.ondemand_messages) {
     command.setOnDemandSensorRate();
     command.takePhoto();
   }
-
+  
   if (req.body.gripper_open) {
     command.gripperOpen();
   }
-
+  
   if (req.body.gripper_close) {
     command.gripperClose();
   }
-
+  
   if (req.body.nonstop_messages) {
     command.setContinuousSensorRate();
     command.takePhoto();
   }
-
+  
   command.sendSensorMessage();
-
+  
   return command;
 };
