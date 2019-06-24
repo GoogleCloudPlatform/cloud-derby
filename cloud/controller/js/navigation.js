@@ -543,20 +543,21 @@ module.exports = class Navigation {
     // size ratio of object
     let expectedRatio = realObjectVerticalSizeMm / realObjectHorizontalSizeMm;
     let visibleRatio = bBox.h / bBox.w;
-    console.log("findDistance(): Object visibility: expectedRatio=" + expectedRatio.toFixed(4) + ", visibleRatio="+visibleRatio.toFixed(4));
+    let debug = "Object visibility: expectedRatio=" + expectedRatio.toFixed(4) + ", visibleRatio="+visibleRatio.toFixed(4));
     
     // Depending if we see more of a width vs height use that for calculations
     if (expectedRatio < visibleRatio) {
+      console.log("findDistance(): Using height to calculate distance: " + debug);
       sensorSizeMM = Settings.camera.SENSOR_HEIGHT_MM;
       realObjectSizeMM = realObjectVerticalSizeMm;
       relativeObjectSize = bBox.h;
     } else {
+      console.log("findDistance(): Using width to calculate distance: " + debug);
       sensorSizeMM = Settings.camera.SENSOR_WIDTH_MM;
       realObjectSizeMM = realObjectHorizontalSizeMm;
       relativeObjectSize = bBox.w;
     }
-    
-    // This uses relative coordinates - 0 to 1 relative to the overall image size
+  
     let distanceMM = (Settings.camera.FOCAL_LENGTH_MM * realObjectSizeMM / (relativeObjectSize * sensorSizeMM))
         - Settings.MIN_DISTANCE_TO_CAMERA_MM;
     

@@ -25,7 +25,7 @@ module.exports = {
   BALLS_NEEDED: 3,
   
   // Diameter of the ball
-  BALL_SIZE_MM: 60.638,
+  BALL_SIZE_MM: 60.64,
   
   // Width of the Home Base sign (letter size is 216mm, but the letter is not printed on 100% of the paper)
   HOME_WIDTH_MM: 200,
@@ -54,13 +54,11 @@ module.exports = {
     H_FIELD_OF_VIEW: 120.0,
     
     // Size of the camera sensor is 1/4 inch - see more details: https://en.wikipedia.org/wiki/Image_sensor_format
-    // SENSOR_HEIGHT_MM: 6.35,
     SENSOR_HEIGHT_MM: 2.7,
     SENSOR_WIDTH_MM: 3.6,
     
     // Focal length of the camera - it is adjustable, so we need to calibrate it before using this camera for navigation
-    // FOCAL_LENGTH_MM: 6.1,
-    FOCAL_LENGTH_MM: 14.35,
+    FOCAL_LENGTH_MM: 2.594,
     
     // Horizontal resolution
     HORIZONTAL_RESOLUTION_PIXELS: process.env.HORIZONTAL_RESOLUTION_PIXELS,
