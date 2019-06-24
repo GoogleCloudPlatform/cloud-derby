@@ -15,7 +15,7 @@
  */
 
 'use strict';
-var DriveMessage = require('./drive-message').DriveMessage;
+const DriveMessage = require('./drive-message').DriveMessage;
 
 /************************************************************
  Display Manual Driving form on Get
@@ -35,29 +35,29 @@ module.exports.manualDrivingForm = function (inboundMsgHistory) {
   let form = `<a href="/">Home</a> / <a href="/manual_mode">Refresh page</a>
     <h1>Manual car control</h1>
     <form action="/manual_control_action" method="post">
-    <label for="speed">Turn speed: </label>
-    <input id="speed" type="number" name="turn_speed_field">(wheel angle/sec) - from 1 to 1000
+    <label for="turn_speed">Turn speed: </label>
+    <input id="turn_speed" type="number" name="turn_speed_field">(wheel angle/sec) - from 1 to 1000
     <br>
     <label for="Turn angle">Turn: </label>
     <input id="Turn angle" type="number" name="angle_field">(degrees) - positive for right, negative for left
     <br>
-    <label for="speed">Driving speed: </label>
-    <input id="speed" type="number" name="drive_speed_field">(wheel angle/sec) - from 1 to 1000
+    <label for="drive_speed">Driving speed: </label>
+    <input id="drive_speed" type="number" name="drive_speed_field">(wheel angle/sec) - from 1 to 1000
     <br>
     <label for="distance_drive">Drive distance: </label>
     <input id="distance" type="number" name="distance_field">(mm) - positive for forward, negative for backward
     <br>
-    <label for="gripper">Open gripper: </label>
-    <input id="gripper" type="checkbox" name="gripper_open">
+    <label for="gripper_open">Open gripper: </label>
+    <input id="gripper_open" type="checkbox" name="gripper_open">
     <br>
-    <label for="gripper">Close gripper: </label>
-    <input id="gripper" type="checkbox" name="gripper_close">
+    <label for="gripper_close">Close gripper: </label>
+    <input id="gripper_close" type="checkbox" name="gripper_close">
     <br>
     <label for="photo">Send sensor messages when asked: </label>
     <input id="photo" type="checkbox" name="ondemand_messages">
     <br>
-    <label for="gripper">Send sensor messages non-stop: </label>
-    <input id="gripper" type="checkbox" name="nonstop_messages">
+    <label for="msgs">Send sensor messages non-stop: </label>
+    <input id="msgs" type="checkbox" name="nonstop_messages">
     <br><br>
     <input type="submit" value="Send control message to the car">
 </form>`;

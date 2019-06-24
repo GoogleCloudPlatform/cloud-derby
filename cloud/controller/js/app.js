@@ -17,7 +17,7 @@
 const VERSION = 1.01;
 const APP = 'DRIVING-CONTROL-APP';
 const express = require('express');
-const cors = require('cors')
+const cors = require('cors');
 
 console.log(`***${APP} is starting up***`);
 
@@ -58,7 +58,7 @@ const carId = process.env.CAR_ID;
 const MAX_MSG_AGE_SEC = 60;
 
 // Instantiate Express runtime
-var app = express();
+const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -339,8 +339,7 @@ function debugDrivingForm() {
 /************************************************************
  API Endpoints
  ************************************************************/
-// Define the routes for the REST API
-var router = express.Router();              // get an instance of the express Router
+const router = express.Router();              // get an instance of the express Router
 
 // CORS will be controlled by the API GW layer
 router.all('*', cors());

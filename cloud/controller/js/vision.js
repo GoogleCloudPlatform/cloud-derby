@@ -15,7 +15,7 @@
  */
 
 'use strict';
-var process = require('process'); // Required for mocking environment variables
+const process = require('process'); // Required for mocking environment variables
 const request = require('request');
 
 // User credentials to authenticate to remote Inference VM service
@@ -28,11 +28,11 @@ const INFERENCE_URL = process.env.INFERENCE_URL;
 const OBJECT_INFERENCE_API_URL = APP_URL + ':' + HTTP_PORT + INFERENCE_URL;
 
 require('dotenv').config();
-var VisionResponse = require('./vision-response');
-var BoundingBox = require('./bounding-box');
+const VisionResponse = require('./vision-response');
+const BoundingBox = require('./bounding-box');
 
 // Initialize simulation engine (it may be On or Off)
-var VisionSimulator = require('./simulation').VisionSimulator;
+const VisionSimulator = require('./simulation').VisionSimulator;
 let visionSimulator = new VisionSimulator();
 
 /**************************************************************************
@@ -49,7 +49,7 @@ module.exports = class Vision {
    Send image to ML and parse it
    Input:
    - sensorMessage - includes GCS URL to the Image (gs://...)
-   Ouput:
+   Output:
    - VisionResponse - Coordinates of various objects that were recognized
    ************************************************************/
   recognizeObjects(sensorMessage) {
@@ -75,7 +75,7 @@ module.exports = class Vision {
     })
     .catch((error) => {
       console.log("vision.recognizeObjects(): Error calling remote Object Detection API: " + error);
-      // In case of an error, return empty reponse
+      // In case of an error, return empty response
       return new VisionResponse();
     });
   }
@@ -84,17 +84,17 @@ module.exports = class Vision {
    Generate response from the ML Vision
    Input:
    - jsonAPIResponse - response from the Vision API
-   Ouput:
+   Output:
    - VisionResponse - Coordinates of various objects that were recognized
    ************************************************************/
   createVisionResponse(jsonAPIResponse) {
     let response = new VisionResponse();
-    var objResponse = JSON.parse(jsonAPIResponse);
-    
-    for (var key in objResponse) {
-      for (var i = 0; i < objResponse[key].length; i++) {
+    const objResponse = JSON.parse(jsonAPIResponse);
+  
+    for (let key in objResponse) {
+      for (let i = 0; i < objResponse[key].length; i++) {
         //console.log("objResponse[key]["+i+"]: "+JSON.stringify(objResponse[key][i]));
-        var bBox = new BoundingBox(key, objResponse[key][i]["x"], objResponse[key][i]["y"], objResponse[key][i]["w"], objResponse[key][i]["h"], objResponse[key][i]["score"]);
+        const bBox = new BoundingBox(key, objResponse[key][i]["x"], objResponse[key][i]["y"], objResponse[key][i]["w"], objResponse[key][i]["h"], objResponse[key][i]["score"]);
         response.addBox(bBox);
       }
     }
@@ -105,13 +105,13 @@ module.exports = class Vision {
    Generate response from the ML Vision
    Input:
    - sensorMessage - message from the car with sensor data
-   Ouput:
+   Output:
    -
    ************************************************************/
   recognizeObjectAPIAsync(sensorMessage) {
     return new Promise(function (resolve, reject) {
-      var gcsURI = sensorMessage.sensors.frontCameraImagePathGCS;
-      
+      const gcsURI = sensorMessage.sensors.frontCameraImagePathGCS;
+  
       if (!gcsURI) {
         reject("Error: No gcURI found in sensorMessage");
         
@@ -120,14 +120,14 @@ module.exports = class Vision {
         
       } else {
         // Example request for the inference VM: http://xx.xx.xx.xx:8082/v1/objectInference?gcs_uri=gs%3A%2F%2Fcamera-9-roman-test-oct9%2Fimage1.jpg
-        var apiUrl = OBJECT_INFERENCE_API_URL + "?gcs_uri=" + encodeURIComponent(gcsURI);
+        const apiUrl = OBJECT_INFERENCE_API_URL + "?gcs_uri=" + encodeURIComponent(gcsURI);
         console.log("Vision API URL: " + apiUrl);
         // var visionResponse = new VisionResponse();
         const auth = {user: INFERENCE_USER_NAME, pass: INFERENCE_PASSWORD};
         
         // Measure the time it takes to call inference API
-        var startTime = Date.now();
-        
+        const startTime = Date.now();
+  
         request({uri: apiUrl, auth: auth}, function (err, response, body) {
           if (err) {
             console.log("!!! ERROR !!! calling remote ML API: " + err + ". Please verify that your Inference VM and the App are up and running and proper HTTP port is open in the firewall.");

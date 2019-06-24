@@ -15,16 +15,16 @@
  */
 
 'use strict';
-var Settings = require('./game-settings');
-var Vision = require('./vision');
-var DriveMessage = require('./drive-message').DriveMessage;
+const Settings = require('./settings');
+const Vision = require('./vision');
+const DriveMessage = require('./drive-message').DriveMessage;
 const SEEK_BALL_TURN = require('./drive-message').SEEK_BALL_TURN;
 const CHECK_GRIP = require('./drive-message').CHECK_GRIP;
 const GO2BASE = require('./drive-message').GO2BASE;
 const SEEK_HOME_TURN = require('./drive-message').SEEK_HOME_TURN;
 
 // Initialize simulation engine (it may be On or Off)
-var DriveMessageSimulator = require('./simulation').DriveMessageSimulator;
+const DriveMessageSimulator = require('./simulation').DriveMessageSimulator;
 let driveSimulation = new DriveMessageSimulator();
 const TURN_SPEED = Settings.MAX_SPEED / 10;
 // Many GoPiGo motors are driving at different speed causing left and right motor to skew the car when driven at max,
@@ -381,7 +381,8 @@ module.exports = class Navigation {
   calculateBallDirections(bBox, obstacleFound) {
     console.log("calculateBallDirections(): start");
     let angle = this.findAngle(bBox);
-    let distance = this.findDistanceMM(bBox, Settings.BALL_SIZE_MM);
+    // Ball is the same in height and width (unlike home sign), so we are passing it twice
+    let distance = this.findDistanceMM(bBox, Settings.BALL_SIZE_MM, Settings.BALL_SIZE_MM);
     let command = new DriveMessage();
     command.setModeAutomatic();
     
@@ -455,7 +456,7 @@ module.exports = class Navigation {
   calculateHomeDirections(bBox, obstacleFound) {
     console.log("calculateHomeDirections(): start...");
     let angle = this.findAngle(bBox);
-    let distance = this.findDistanceMM(bBox, Settings.HOME_SIZE_MM);
+    let distance = this.findDistanceMM(bBox, Settings.HOME_WIDTH_MM, Settings.HOME_HEIGHT_MM);
     let command = new DriveMessage();
     command.setModeAutomatic();
     // How far from the home base sign can we release the ball
@@ -535,19 +536,31 @@ module.exports = class Navigation {
    Output:
    - Distance to the object in mm
    ************************************************************/
-  findDistanceMM(bBox, realObjectVerticalSizeMm) {
-    // Calibration constant - this is used to adjust and calibrate distance calculation based on specifics of camera,
-    // ball, etc. const CALIBRATION_MULTIPLIER = 1; const CALIBRATION_ADDON_MM = 0;
+  findDistanceMM(bBox, realObjectHorizontalSizeMm, realObjectVerticalSizeMm) {
+    let sensorSizeMM, realObjectSizeMM, relativeObjectSize;
     
-    // Since we are navigating to round balls - use the largest dimension (ball can be only partially visible)
-    let relative_object_size = Math.max(bBox.h, bBox.w);
+    // Use the largest dimension because objects can be partially visible - hence we calculate expected vs visible
+    // size ratio of object
+    let expectedRatio = realObjectVerticalSizeMm / realObjectHorizontalSizeMm;
+    let visibleRatio = bBox.h / bBox.w;
+    console.log("findDistance(): Object visibility: expectedRatio=" + expectedRatio.toFixed(4) + ", visibleRatio="+visibleRatio.toFixed(4));
+    
+    // Depending if we see more of a width vs height use that for calculations
+    if (expectedRatio < visibleRatio) {
+      sensorSizeMM = Settings.camera.SENSOR_HEIGHT_MM;
+      realObjectSizeMM = realObjectVerticalSizeMm;
+      relativeObjectSize = bBox.h;
+    } else {
+      sensorSizeMM = Settings.camera.SENSOR_WIDTH_MM;
+      realObjectSizeMM = realObjectHorizontalSizeMm;
+      relativeObjectSize = bBox.w;
+    }
     
     // This uses relative coordinates - 0 to 1 relative to the overall image size
-    let distanceMM = (Settings.camera.FOCAL_LENGTH_MM * realObjectVerticalSizeMm /
-      (relative_object_size * Settings.camera.SENSOR_HEIGHT_MM)) - Settings.MIN_DISTANCE_TO_CAMERA_MM;
+    let distanceMM = (Settings.camera.FOCAL_LENGTH_MM * realObjectSizeMM / (relativeObjectSize * sensorSizeMM))
+        - Settings.MIN_DISTANCE_TO_CAMERA_MM;
     
     console.log("findDistance(): Calculated: " + distanceMM.toFixed(0) + " mm");
-    // This part below really should have been done by non-linear regression, but as a hack do it manually for now
     if (distanceMM < 115) {
       distanceMM = 20;
     } else if (distanceMM < 325) {

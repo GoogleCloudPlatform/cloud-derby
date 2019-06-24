@@ -17,7 +17,7 @@
 /**************************************************************************
  Various useful things
  **************************************************************************/
-var fs = require('fs');
+const fs = require('fs');
 
 /**************************************************************************
  Generates random whole number between 0 and MAX
@@ -54,9 +54,9 @@ function toDegrees(angle) {
  **************************************************************************/
 function yyyymmdd(date) {
   Date.prototype.yyyymmdd = function () {
-    var mm = this.getMonth() + 1; // getMonth() is zero-based
-    var dd = this.getDate();
-    
+    const mm = this.getMonth() + 1; // getMonth() is zero-based
+    const dd = this.getDate();
+  
     return [this.getFullYear(), (mm > 9 ? '' : '0') + mm, (dd > 9 ? '' : '0') + dd].join('');
   };
   
@@ -120,9 +120,8 @@ function capitalizeFirstLetter(string) {
  - Size in bytes
  **************************************************************************/
 function getFilesizeInBytes(filename) {
-  var stats = fs.statSync(filename);
-  var fileSizeInBytes = stats["size"];
-  return fileSizeInBytes;
+  const stats = fs.statSync(filename);
+  return stats["size"];
 }
 
 /**************************************************************************

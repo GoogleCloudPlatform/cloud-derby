@@ -15,10 +15,10 @@
  */
 
 'use strict';
-var DriveMessage = require('./drive-message');
-var VisionResponse = require('./vision-response');
-var BoundingBox = require('./bounding-box');
-var Settings = require('./game-settings');
+const DriveMessage = require('./drive-message');
+const VisionResponse = require('./vision-response');
+const BoundingBox = require('./bounding-box');
+const Settings = require('./settings');
 
 /************************************************************
  Simulation for car commands. Pre-set messages being sent to the car regardless of input
@@ -117,7 +117,7 @@ class VisionSimulator {
     let response = new VisionResponse();
     let fake = this.COMMANDS[this.index];
     // Randomly generate fake objects
-    for (var i = fake.length; i--;) {
+    for (let i = fake.length; i--;) {
       response.addBox(fake[i]);
     }
     

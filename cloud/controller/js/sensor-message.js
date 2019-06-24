@@ -18,7 +18,7 @@
 
 /**************************************************************************
  sensorMessage object
- - carId - unuque ID of the car that sent this message
+ - carId - unique ID of the car that sent this message
  - balls - how many balls this car has collected so far
  - obstacle - is there an obstacle or not (boolean)
  - battery - percentage of the battery left (0-100)
