@@ -17,7 +17,7 @@
 'use strict';
 
 /************************************************************
-  Outline of the object as found by object detection API
+ Outline of the object as found by object detection API
  ************************************************************/
 module.exports = class BoundingBox {
   constructor(label, x, y, w, h, score) {
@@ -34,12 +34,12 @@ module.exports = class BoundingBox {
     // object detection probability - between 0 and 1
     this.score = score;
   }
-
+  
   // Returns YY coordinate (top border of the object)
   yy() {
     return this.y + this.h;
   }
-
+  
   // Returns XX coordinate (right border of the object)
   xx() {
     return this.x + this.w;

@@ -50,7 +50,7 @@ TMP="tmp"
 ADMIN_READ_GROUP="read-only-group@$DOMAIN"
 
 ### GAM is a wonderful OSS tool to manage Users and Groups
-GAM="/home/ubuntu/bin/gam/gam"
+GAM="/home/${USER}/bin/gam/gam"
 
 ###############################################################################
 # Lookup Org ID from the Domain name
