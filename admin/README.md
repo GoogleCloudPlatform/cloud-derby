@@ -6,7 +6,7 @@ own GCP organization or inside of the cloudderby.io.
 
 ## Create new environment to run a public hackathon
 
-The event settings can be updated in the [hackathon.sh](hackathon.sh) file:
+The event settings can be updated in the [setenv.sh](setenv.sh) file:
 
 - `NUM_TEAMS` - How many teams will participate in the workshop (between 1 and N).
 - `NUM_PEOPLE_PER_TEAM` - How many people per team (usually between 1 and 6).
@@ -50,7 +50,8 @@ After you host the event for your audience, you want to make sure that all users
 are deleted to avoid unncecessary charges. This cleanup process is fully automated. Here is what you need to do from the bash command line in your Debian or Ubuntu:
 
 - `gcloud init` - this will initialize your admin credentials for the GCP Org.
-- Verify that the settings in [hackathon.sh](hackathon.sh) match your environment (aka name of the event, number of teams and users).
+- Verify that the settings in [setenv.sh](setenv.sh) match your environment (aka name of the event, number
+ of teams and users).
 - `./delete-hackathon.sh $FOLDER_ID` - this will erase users, groups, all folders, VMs, projects, etc. under the `$FOLDER_ID` the folder you created while generating new hackathon event.
 for the event (for example "March-11-Denver" mapped into folder ID "123456789").
 - If you do not want to remove users, groups and projects, you can run a script `./stop-vms.sh $FOLDER_ID` to stop all of the VMs in all nested sub-folders and projects under `$FOLDER_ID`.
