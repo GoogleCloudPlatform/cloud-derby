@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#############################################################################
+# Shared environment variables and utility functions for entire project
+#############################################################################
 #
 # Copyright 2018 Google LLC
 #
@@ -14,11 +17,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-#############################################################################
-# Shared environment variables and utility functions for entire project
-#############################################################################
 echo "setenv-global.sh: start..."
 
 command -v bc >/dev/null 2>&1 || { echo >&2 "'bc' is not installed."; yes | sudo apt-get --assume-yes install bc; }
@@ -144,13 +143,13 @@ start_timer()
 ###############################################
 measure_timer()
 {
-    if [ -z ${START_TIME+x} ]; then
-        MEASURED_TIME=0
-    else
-        END_TIME=$(date +%s)
-        local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
-        MEASURED_TIME=$(printf "%.2f\n" $TIMER)
-    fi
+  if [ -z ${START_TIME+x} ]; then
+    MEASURED_TIME=0
+  else
+    END_TIME=$(date +%s)
+    local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
+    MEASURED_TIME=$(printf "%.2f\n" $TIMER)
+  fi
 }
 
 ###############################################
@@ -219,7 +218,7 @@ echo_my()
 	if [ $ECHO_REQUESTED = $ECHO_DEBUG ]; then PREFIX="${ORANGE}[DEBUG] ${PREFIX}"; fi
 	if [ $ECHO_REQUESTED = $ECHO_NO_PREFIX ]; then PREFIX="${GREEN}"; fi
 
-    measure_timer
+  measure_timer
 	printf "${PREFIX}$1 ($MEASURED_TIME seconds)${NORMAL}\n"
 }
 
@@ -228,29 +227,59 @@ echo_my()
 ###############################################
 create_resources()
 {
-    echo_my "Create Topics and Subscriptions for car to cloud communication..."
+  echo_my "Create Topics and Subscriptions for car to cloud communication..."
 
-    if gcloud pubsub topics list | grep $COMMAND_TOPIC; then
-	    echo_my "Topic $COMMAND_TOPIC found OK"
+  if gcloud pubsub topics list | grep $COMMAND_TOPIC; then
+    echo_my "Topic $COMMAND_TOPIC found OK"
+  else
+    echo_my "Create PubSub topic '$COMMAND_TOPIC'..."
+    gcloud pubsub topics create $COMMAND_TOPIC
+  fi
+
+  if gcloud pubsub topics list | grep $SENSOR_TOPIC; then
+    echo_my "Topic $SENSOR_TOPIC found OK"
+  else
+    echo_my "Create PubSub topic '$SENSOR_TOPIC'..."
+    gcloud pubsub topics create $SENSOR_TOPIC
+  fi
+
+  if gcloud pubsub subscriptions list | grep $SENSOR_SUBSCRIPTION; then
+    echo_my "Drop and create subscription for sensor data to avoid processing of old messages..."
+    gcloud pubsub subscriptions delete $SENSOR_SUBSCRIPTION
+  fi
+
+  echo_my "Creating a subscription '$SENSOR_SUBSCRIPTION'..."
+  gcloud pubsub subscriptions create $SENSOR_SUBSCRIPTION --topic $SENSOR_TOPIC
+}
+
+###############################################
+# Install Node and NPM
+###############################################
+install_node()
+{
+  if which sw_vers; then
+    echo "MAC OS found"
+    if which node; then
+      echo "node and npm are already installed"
     else
-        echo_my "Create PubSub topic '$COMMAND_TOPIC'..."
-        gcloud pubsub topics create $COMMAND_TOPIC
+      echo "Please install and configure nodeJS as described here: https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/"
+      exit 1
     fi
+  else
+    lsb_release -a
+    echo "We are running on Linux"
+    echo_my "Downloading 'node'..."
+    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    echo_my "Installing 'node'..."
+    sudo apt-get install nodejs
+  fi
 
-    if gcloud pubsub topics list | grep $SENSOR_TOPIC; then
-	    echo_my "Topic $SENSOR_TOPIC found OK"
-    else
-        echo_my "Create PubSub topic '$SENSOR_TOPIC'..."
-	    gcloud pubsub topics create $SENSOR_TOPIC
-    fi
-
-    if gcloud pubsub subscriptions list | grep $SENSOR_SUBSCRIPTION; then
-        echo_my "Drop and create subscription for sensor data to avoid processing of old messages..."
-    	gcloud pubsub subscriptions delete $SENSOR_SUBSCRIPTION
-    fi
-
-    echo_my "Creating a subscription '$SENSOR_SUBSCRIPTION'..."
-    gcloud pubsub subscriptions create $SENSOR_SUBSCRIPTION --topic $SENSOR_TOPIC
+  node -v
+  npm -v
+  cd js
+  echo_my "Installing npm modules..."
+  npm install
+  # npm install --save @google-cloud/debug-agent @google-cloud/bigquery
 }
 
 echo "setenv-global.sh: done"
