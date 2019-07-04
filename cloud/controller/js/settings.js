@@ -34,10 +34,10 @@ module.exports = {
   HOME_HEIGHT_MM: 250,
   
   // Various labels returned by vision API, such as <color><suffix> - aka "red_ball"
-  BALL_LABEL_SUFFIX: "Ball",
+  BALL_LABEL_SUFFIX: process.env.BALL_LABEL_SUFFIX,
   
   // Various labels returned by vision API, such as <color><suffix> - aka "red_home"
-  HOME_LABEL_SUFFIX: "Home",
+  HOME_LABEL_SUFFIX: process.env.HOME_LABEL_SUFFIX,
   
   // Distance from the camera to the ball in a fully captured position - this is defined by the location of the
   // camera when it is mounted on the ball gripper

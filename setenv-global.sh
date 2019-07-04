@@ -28,8 +28,8 @@ set -u # This prevents running the script if any of the variables have not been 
 set -e # Exit if error is detected during pipeline execution
 
 ### Camera resolution
-export HORIZONTAL_RESOLUTION_PIXELS=1024
-export VERTICAL_RESOLUTION_PIXELS=576
+export HORIZONTAL_RESOLUTION_PIXELS="1024"
+export VERTICAL_RESOLUTION_PIXELS="576"
 
 ### Demo project with the inference VM running at all times for use by anyone
 export DEMO_PROJECT="robot-derby-demo-1"
@@ -48,60 +48,65 @@ export SERVICE_ACCOUNT="cloud-derby-dev"
 export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
 
 ### Topic where cloud logic sends driving commands to and car reads them from here
-export COMMAND_TOPIC=driving-commands-topic-$CAR_ID
+export COMMAND_TOPIC="driving-commands-topic-$CAR_ID"
 
 ### Topic where the car sends its sensor data and cloud logic reads it from
-export SENSOR_TOPIC=sensor-data-topic-$CAR_ID
+export SENSOR_TOPIC="sensor-data-topic-$CAR_ID"
 
 ### Subscription on the above sensor topic for cloud logic to read data from the car
-export SENSOR_SUBSCRIPTION=sensor-data-subscription-$CAR_ID
+export SENSOR_SUBSCRIPTION="sensor-data-subscription-$CAR_ID"
 
 ### GCS bucket for car to post its images to and for cloud logic to read it from here
-export CAR_CAMERA_BUCKET=camera-${CAR_ID}-$PROJECT
+export CAR_CAMERA_BUCKET="camera-${CAR_ID}-${PROJECT}"
 
 ### IOT Core registry where the car sends its sensor data and cloud logic reads it from
-export IOT_CORE_REGISTRY=car-iot-registry
+export IOT_CORE_REGISTRY="car-iot-registry"
 
 ### IOT Core Device ID
-export IOT_CORE_DEVICE_ID=iot-car-$CAR_ID
+export IOT_CORE_DEVICE_ID={iot-car-$CAR_ID}
 
 ### Inference IP address logical name
-export ML_IP_NAME=ml-static-ip-$VERSION
+export ML_IP_NAME="ml-static-ip-$VERSION"
 
 ### This URL will be appended to the VM IP address to call Inference Vision API
 export INFERENCE_URL="/v1/objectInference"
 
 ### Credentials to call Inference App
-export INFERENCE_USER_NAME=robot
-export INFERENCE_PASSWORD=gcp4all
+export INFERENCE_USER_NAME="robot"
+export INFERENCE_PASSWORD="gcp4all"
 
 ### Firewal tags
 # HTTP_PORT is used to run Inference VM app to serve REST requests
-export HTTP_PORT=8082
-export HTTP_TAG=http-from-all
-export SSH_TAG=ssh-from-all
+export HTTP_PORT="8082"
+export HTTP_TAG="http-from-all"
+export SSH_TAG="ssh-from-all"
 
 ### VM network name for diagnostics and debug
 export VM_NAME=$(uname -n)
 
 ### Labels and IDs of objects to be recognized
-export NUM_CLASSES=8
-export BLUE_BALL_ID=1
-export BLUE_BALL_LABEL=BlueBall
-export RED_BALL_ID=2
-export RED_BALL_LABEL=RedBall
-export YELLOW_BALL_ID=3
-export YELLOW_BALL_LABEL=YellowBall
-export GREEN_BALL_ID=4
-export GREEN_BALL_LABEL=GreenBall
-export BLUE_HOME_ID=5
-export BLUE_HOME_LABEL=BlueHome
-export RED_HOME_ID=6
-export RED_HOME_LABEL=RedHome
-export YELLOW_HOME_ID=7
-export YELLOW_HOME_LABEL=YellowHome
-export GREEN_HOME_ID=8
-export GREEN_HOME_LABEL=GreenHome
+export NUM_CLASSES="8"
+export BALL_LABEL_SUFFIX="Ball"
+export HOME_LABEL_SUFFIX="Home"
+
+export BLUE_BALL_ID="1"
+export BLUE_BALL_LABEL="Blue$BALL_LABEL_SUFFIX"
+export RED_BALL_ID="2"
+export RED_BALL_LABEL="Red$BALL_LABEL_SUFFIX"
+export YELLOW_BALL_ID="3"
+export YELLOW_BALL_LABEL="Yellow$BALL_LABEL_SUFFIX"
+export GREEN_BALL_ID="4"
+export GREEN_BALL_LABEL="Green$BALL_LABEL_SUFFIX"
+export BLUE_HOME_ID="5"
+export BLUE_HOME_LABEL="Blue$HOME_LABEL_SUFFIX"
+export RED_HOME_ID="6"
+export RED_HOME_LABEL="Red$HOME_LABEL_SUFFIX"
+export YELLOW_HOME_ID="7"
+export YELLOW_HOME_LABEL="Yellow$HOME_LABEL_SUFFIX"
+export GREEN_HOME_ID="8"
+export GREEN_HOME_LABEL="Green$HOME_LABEL_SUFFIX"
+
+export ALL_OBJECT_LABELS="$BLUE_BALL_LABEL $RED_BALL_LABEL $YELLOW_BALL_LABEL $GREEN_BALL_LABEL $BLUE_HOME_LABEL $RED_HOME_LABEL $YELLOW_HOME_LABEL $GREEN_HOME_LABEL"
 
 ###############################################
 # Wait for user input
