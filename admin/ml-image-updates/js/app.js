@@ -19,6 +19,10 @@ console.log(`***Image processing is starting up***`);
 // Imports
 const process = require('process'); // Required for mocking environment variables
 const request = require('request');
+
+const Storage = require('@google-cloud/storage');
+const storage = new Storage(process.env.PROJECT);
+
 const VisionResponse = require('../../../cloud/controller/js/vision-response');
 const BoundingBox = require('../../../cloud/controller/js/bounding-box');
 
@@ -31,57 +35,78 @@ const OBJECT_INFERENCE_API_URL = APP_URL + ':' + HTTP_PORT + INFERENCE_URL;
 const INFERENCE_USER_NAME = process.env.INFERENCE_USER_NAME;
 const INFERENCE_PASSWORD = process.env.INFERENCE_PASSWORD;
 const ALL_OBJECT_LABELS = process.env.ALL_OBJECT_LABELS.split(" ");
+const DESTINATION_BUCKET = process.env.DESTINATION_BUCKET;
 
 /************************************************************
  Scan all files in the bucket
  Great examples of API use can be found here:
  https://github.com/googleapis/nodejs-storage/blob/99e3b17f0b12ea66ed46060ca291124b10772111/samples/files.js#L26
  ************************************************************/
-async function processAllFiles(bucketName) {
-  const Storage = require('@google-cloud/storage');
-  const storage = new Storage(process.env.PROJECT);
-  const [files] = await storage.bucket(bucketName).getFiles();
-  let i = 1;
-  
-  files.forEach(file => {
-    //  TODO - for now terminate after few calls - debugging time
-    if (i < 2) {
-      console.log('processAllFiles(): #' + i);
-      processOneFile(bucketName, file.name);
-    }
-    i++;
-  });
-  
-  console.log('processAllFiles(): Processed total of ' + i + " files.");
-}
 
 /************************************************************
  Process one file
  ************************************************************/
-async function processOneFile(bucketName, fileName) {
-  console.log('processOneFile(): ' + fileName);
-  let visionResponse = await recognizeObjects('gs://' + bucketName + '/' + fileName);
-  console.log('processOneFile(): vision response: ' + JSON.stringify(visionResponse));
+async function processOneFile(srcBucket, srcFile) {
+  // console.log('processOneFile(): ' + srcFile);
+  let visionResponse = await recognizeObjects('gs://' + srcBucket + '/' + srcFile);
+  // console.log('processOneFile(): vision response: ' + JSON.stringify(visionResponse));
   
   for (let label of ALL_OBJECT_LABELS) {
     let found = findObject(label, visionResponse);
-    console.log('Searching for "' + label + '": ' + found);
-    
+    // console.log('Searching for "' + label + '": ' + found);
+    let subfolder = 'none';
+    if (found) {
+      subfolder = 'some';
+    }
+    let destFile = label + '/' + subfolder + '/' + srcFile;
+    await gcsCopy(srcBucket, srcFile, DESTINATION_BUCKET, destFile);
   }
   
+  // After all labels have been processed, we delete the file from the source bucket
+  gcsDelete(srcBucket, srcFile)
+  .catch(function (error) {
+    
+    alert("Error deleting file: " + error);
+    
+  });
+  console.log('Finished processing file ' + srcFile);
 }
 
 /************************************************************
- Based on the list of object locations, find the object closest to observer.
- This assumes that all objects of this label are the same size
+ Copy file from one bucket into another
+ Input:
+ - source GCS URI
+ - destination GCS URI
+ ************************************************************/
+async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
+  storage.bucket(srcBucket).file(srcFile).copy(storage.bucket(destBucket).file(destFile))
+  .catch(function (error) {
+    console.log("Failed to copy a file: " + error);
+  });
+}
+
+/************************************************************
+ Delete file from the bucket
+ Input:
+ - source GCS URI
+ ************************************************************/
+async function gcsDelete(bucket, file) {
+  storage.bucket(bucket).file(file).delete()
+  .catch(function (error) {
+    console.log("Failed to delete a file: " + error);
+  });
+  ;
+}
+
+/************************************************************
+ Find the right object based on objectType input in the image
  Input:
  - object label
  - list of object bounding boxes found by Object Detection
  Output:
  - True if the object has been found, False otherwise
  ************************************************************/
-function findObject(objectType, visionResponse)
-{
+function findObject(objectType, visionResponse) {
   // console.log("findObject(): Looking for an object of type <" + objectType + ">");
   // console.log('findObject(): vision response: ' + JSON.stringify(visionResponse));
   
@@ -97,6 +122,8 @@ function findObject(objectType, visionResponse)
 
 /************************************************************
  Call Vision API to recognize objects in the file
+ Input: full path to GCS object
+ Output: VisionResponse object
  ************************************************************/
 function recognizeObjects(gcsPath) {
   console.log('recognizeObjects(): ' + gcsPath);
@@ -186,6 +213,26 @@ function recognizeObjectAPIAsync(gcsURI) {
  ************************************************************/
 console.log("Image processing started...");
 
-let files = processAllFiles(process.env.CLOUD_BUCKET);
+let bucket = storage.bucket(process.env.CLOUD_BUCKET);
 
-console.log("Image processing is in progress...");
+// bucket.getFiles({}, (err, files) => {console.log(err,files)});
+bucket.getFiles({}, (err, files) => {
+  if (err) {
+    console.log("ERROR getting a list of files: " + err);
+  } else {
+    let i = 1;
+    files.forEach(file => {
+      //  TODO - for now terminate after few calls - debugging time
+      if (i < 25) {
+        console.log('file #' + i + ': ' + file.name);
+        processOneFile(process.env.CLOUD_BUCKET, file.name)
+        .catch(function (error) {
+          console.log('Error processing file <' + file.name + '> with the error: ' + error);
+        });
+      }
+      i++;
+    });
+    
+    console.log('Processed total of ' + i + " files.");
+  }
+});

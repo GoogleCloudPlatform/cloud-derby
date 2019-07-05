@@ -29,6 +29,8 @@ export CLOUD_BUCKET="images-crowdsourcing"
 
 export INFERENCE_IP="104.197.196.4"
 
+export DESTINATION_BUCKET="derby-images-auto-sorted"
+
 ###############################################
 # MAIN
 ###############################################
