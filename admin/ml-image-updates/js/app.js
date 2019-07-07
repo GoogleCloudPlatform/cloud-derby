@@ -37,6 +37,9 @@ const INFERENCE_PASSWORD = process.env.INFERENCE_PASSWORD;
 const ALL_OBJECT_LABELS = process.env.ALL_OBJECT_LABELS.split(" ");
 const DESTINATION_BUCKET = process.env.DESTINATION_BUCKET;
 
+// Global counter of processed files
+let successCount = 0;
+
 /************************************************************
  Scan all files in the bucket
  Great examples of API use can be found here:
@@ -45,30 +48,27 @@ const DESTINATION_BUCKET = process.env.DESTINATION_BUCKET;
 
 /************************************************************
  Process one file
+ Input:
+ - Source Bucket
+ - Source File
+ Output:
+ - None
  ************************************************************/
-async function processOneFile(srcBucket, srcFile) {
-    // console.log('processOneFile(): ' + srcFile);
-    let visionResponse = await recognizeObjects('gs://' + srcBucket + '/' + srcFile);
-    // console.log('processOneFile(): vision response: ' + JSON.stringify(visionResponse));
-
-    for (let label of ALL_OBJECT_LABELS) {
-        let found = findObject(label, visionResponse);
-        // console.log('Searching for "' + label + '": ' + found);
-        let subfolder = 'none';
-        if (found) {
-            subfolder = 'some';
-        }
-        let destFile = label + '/' + subfolder + '/' + srcFile;
-        await gcsCopy(srcBucket, srcFile, DESTINATION_BUCKET, destFile);
-        // console.log('Copy completed for: '+destFile);
-    }
-
-    // After all labels have been processed, we delete the file from the source bucket
-    gcsDelete(srcBucket, srcFile)
-        .catch(function (error) {
-            console.error("!!!!!!!!!!!!! Error deleting file: " + error);
-        });
-    // console.log('Finished processing file ' + srcFile);
+async function processOneFileAsync(srcBucket, srcFile) {
+  let visionResponse = await recognizeObjectsAsync('gs://' + srcBucket + '/' + srcFile);
+  // console.log('processOneFileAsync(): vision response: ' + JSON.stringify(visionResponse));
+  
+  for (let label of ALL_OBJECT_LABELS) {
+    let prefix = findObject(label, visionResponse);
+    await gcsCopy(srcBucket, srcFile, DESTINATION_BUCKET, prefix + srcFile);
+  }
+  
+  // After all labels have been processed, we delete the file from the source bucket
+  gcsDelete(srcBucket, srcFile)
+  .catch(function (error) {
+    console.error("!!!!!!!!!!!!! Error deleting file: " + error);
+  });
+  // console.log('Finished processing file ' + srcFile);
 }
 
 /************************************************************
@@ -78,11 +78,11 @@ async function processOneFile(srcBucket, srcFile) {
  - destination GCS URI
  ************************************************************/
 async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
-    // console.log('Copying into: '+destFile);
-    await storage.bucket(srcBucket).file(srcFile).copy(storage.bucket(destBucket).file(destFile))
-        .catch(function (error) {
-            console.error('!!!!!!!!!!!!! ERROR: Failed to copy a file: ' + destFile + ' with error: ' + error);
-        });
+  console.log('Copy from <gs:' + srcBucket + '//' + srcFile + '> to <gs://' + destBucket + '/' + destFile + '>');
+  await storage.bucket(srcBucket).file(srcFile).copy(storage.bucket(destBucket).file(destFile))
+  .catch(function (error) {
+    console.error('!!!!!!!!!!!!! ERROR: Failed to copy a file: ' + destFile + ' with error: ' + error);
+  });
 }
 
 /************************************************************
@@ -91,11 +91,11 @@ async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
  - source GCS URI
  ************************************************************/
 async function gcsDelete(bucket, file) {
-    // console.log('Deleting file: '+file);
-    storage.bucket(bucket).file(file).delete()
-        .catch(function (error) {
-            console.error("!!!!!!!!!!!! Failed to delete a file: " + error);
-        });
+  // console.log('Deleting file: '+file);
+  storage.bucket(bucket).file(file).delete()
+  .catch(function (error) {
+    console.error("!!!!!!!!!!!! Failed to delete a file: " + error);
+  });
 }
 
 /************************************************************
@@ -104,17 +104,41 @@ async function gcsDelete(bucket, file) {
  - object label
  - list of object bounding boxes found by Object Detection
  Output:
- - True if the object has been found, False otherwise
+ - prefix file path for the future file in the format:
+ "<Label_name>/<#objects>_<high_score>_<low_score>_file_"
+ or for cases when object is not found:
+ "<Label_name>/not_found/"
  ************************************************************/
 function findObject(objectType, visionResponse) {
-    // Iterate over all of the objects in the list and find and compare all of the needed type
-    for (let i = visionResponse.bBoxes.length; i--;) {
-        // Is this the right object type?
-        if (visionResponse.bBoxes[i].label.toLocaleLowerCase().indexOf(objectType.toLowerCase()) >= 0) {
-            return true;
-        }
+  let isFound = false;
+  let count = 0;
+  let highScore = 0.0;
+  let lowScore = 1.0;
+  for (let i = visionResponse.bBoxes.length; i--;) {
+    // Is this the right object type?
+    if (visionResponse.bBoxes[i].label.toLocaleLowerCase().indexOf(objectType.toLowerCase()) >= 0) {
+      isFound = true;
+      count++;
+      let score = parseFloat(visionResponse.bBoxes[i].score);
+      if (highScore < score) {
+        highScore = score;
+      }
+      if (lowScore > score) {
+        lowScore = score;
+      }
     }
-    return false;
+  }
+  
+  let response = objectType + '/none/';
+  
+  if (isFound) {
+    response = objectType +
+      '/count_' + count +
+      '_high_' + highScore.toFixed(4).split('.')[1] +
+      '_low_' + lowScore.toFixed(4).split('.')[1] +
+      '_file_';
+  }
+  return response;
 }
 
 /************************************************************
@@ -122,23 +146,22 @@ function findObject(objectType, visionResponse) {
  Input: full path to GCS object
  Output: VisionResponse object
  ************************************************************/
-function recognizeObjects(gcsPath) {
-    console.log('recognizeObjects(): ' + gcsPath);
-    // return {z: 'aaa'};
-
-    // Call REST API Object Detection
-    // this returns a Promise which when resolved returns the VisionResponse object
-    return recognizeObjectAPIAsync(gcsPath)
-        .then((response) => {
-            return Promise.resolve()
-                .then(() => {
-                    return createVisionResponse(response);
-                });
-        })
-        .catch((error) => {
-            console.error("!!!!!!!!!!!!!!! Error calling remote Object Detection API: " + error);
-            throw error;
-        });
+async function recognizeObjectsAsync(gcsPath) {
+  console.log('recognizeObjectsAsync(): ' + gcsPath);
+  
+  // Call REST API Object Detection
+  // this returns a Promise which when resolved returns the VisionResponse object
+  return recognizeObjectAPIAsync(gcsPath)
+  .then((response) => {
+    return Promise.resolve()
+    .then(() => {
+      return createVisionResponse(response);
+    });
+  })
+  .catch((error) => {
+    console.error("!!!!!!!!!!!!!!! Error calling remote Object Detection API: " + error);
+    throw error;
+  });
 }
 
 /************************************************************
@@ -149,17 +172,17 @@ function recognizeObjects(gcsPath) {
  - VisionResponse - Coordinates of various objects that were recognized
  ************************************************************/
 function createVisionResponse(jsonAPIResponse) {
-    let response = new VisionResponse();
-    const objResponse = JSON.parse(jsonAPIResponse);
-
-    for (let key in objResponse) {
-        for (let i = 0; i < objResponse[key].length; i++) {
-            //console.log("objResponse[key]["+i+"]: "+JSON.stringify(objResponse[key][i]));
-            const bBox = new BoundingBox(key, objResponse[key][i]["x"], objResponse[key][i]["y"], objResponse[key][i]["w"], objResponse[key][i]["h"], objResponse[key][i]["score"]);
-            response.addBox(bBox);
-        }
+  let response = new VisionResponse();
+  const objResponse = JSON.parse(jsonAPIResponse);
+  
+  for (let key in objResponse) {
+    for (let i = 0; i < objResponse[key].length; i++) {
+      //console.log("objResponse[key]["+i+"]: "+JSON.stringify(objResponse[key][i]));
+      const bBox = new BoundingBox(key, objResponse[key][i]["x"], objResponse[key][i]["y"], objResponse[key][i]["w"], objResponse[key][i]["h"], objResponse[key][i]["score"]);
+      response.addBox(bBox);
     }
-    return response;
+  }
+  return response;
 }
 
 /************************************************************
@@ -170,81 +193,85 @@ function createVisionResponse(jsonAPIResponse) {
  -
  ************************************************************/
 function recognizeObjectAPIAsync(gcsURI) {
-    return new Promise(function (resolve, reject) {
-
-        if (!gcsURI) {
-            reject("!!!!!!!!!! Error: No gcURI found in sensorMessage");
-
-        } else if (!gcsURI.startsWith("gs://")) {
-            reject("!!!!!!!!!! Error: gcsURI must start with gs://");
-
+  return new Promise(function (resolve, reject) {
+    
+    if (!gcsURI) {
+      reject("!!!!!!!!!! Error: No gcURI found in sensorMessage");
+      
+    } else if (!gcsURI.startsWith("gs://")) {
+      reject("!!!!!!!!!! Error: gcsURI must start with gs://");
+      
+    } else {
+      // Example request for the inference VM:
+      // http://xx.xx.xx.xx:8082/v1/objectInference?gcs_uri=gs%3A%2F%2Fcamera-9-roman-test-oct9%2Fimage1.jpg
+      const apiUrl = OBJECT_INFERENCE_API_URL + "?gcs_uri=" + encodeURIComponent(gcsURI);
+      const auth = {user: INFERENCE_USER_NAME, pass: INFERENCE_PASSWORD};
+      
+      // Measure the time it takes to call inference API
+      const startTime = Date.now();
+      
+      request({uri: apiUrl, auth: auth}, function (err, response, body) {
+        if (err) {
+          console.error("!!!!!!!!! ERROR calling remote ML API: " + err + ". Please verify that your Inference VM and the App are up and running and proper HTTP port is open in the firewall.");
+          reject(err);
         } else {
-            // Example request for the inference VM:
-            // http://xx.xx.xx.xx:8082/v1/objectInference?gcs_uri=gs%3A%2F%2Fcamera-9-roman-test-oct9%2Fimage1.jpg
-            const apiUrl = OBJECT_INFERENCE_API_URL + "?gcs_uri=" + encodeURIComponent(gcsURI);
-            const auth = {user: INFERENCE_USER_NAME, pass: INFERENCE_PASSWORD};
-
-            // Measure the time it takes to call inference API
-            const startTime = Date.now();
-
-            request({uri: apiUrl, auth: auth}, function (err, response, body) {
-                if (err) {
-                    console.error("!!!!!!!!! ERROR calling remote ML API: " + err + ". Please verify that your Inference VM and the App are up and running and proper HTTP port is open in the firewall.");
-                    reject(err);
-                } else {
-                    console.log("Vision API call took " + (Date.now() - startTime) + " ms. URI: " + apiUrl);
-                    if (response.statusCode !== 200) {
-                        reject("!!!!!!!!!!!! Error: Received  " + response.statusCode + " from API");
-                    } else {
-                        resolve(body);
-                    }
-                }
-            });
+          console.log("Vision API call took " + (Date.now() - startTime) + " ms. URI: " + apiUrl);
+          if (response.statusCode !== 200) {
+            reject("!!!!!!!!!!!! Error: Received  " + response.statusCode + " from API");
+          } else {
+            resolve(body);
+          }
         }
-    });
+      });
+    }
+  });
 }
-
 
 /************************************************************
  Recursively process list of files
  Input:
  - List of files to be processed
+ Output:
+ - None
  ************************************************************/
-function processFiles(filesList) {
-
+async function processFilesAsync(files) {
+  for (let file of files) {
+    console.log('--- #' + successCount + ': ' + file.name);
+    if (DEBUG_COUNT > MAX_COUNT) {
+      break;
+    } else {
+      DEBUG_COUNT++;
+    }
+    
+    await processOneFileAsync(process.env.CLOUD_BUCKET, file.name)
+    .then(() => {
+      console.log('=== done: #' + successCount + ': ' + file.name);
+      successCount++;
+    })
+    .catch(function (error) {
+      console.error('!!! Error processing file <' + file.name + '> with the error: ' + error);
+    });
+  }
 }
 
 /************************************************************
  MAIN
  ************************************************************/
-console.log("Image processing started...");
+console.log("Starting up: Vroom Vroom...");
+
+let DEBUG_COUNT = 0;
+const MAX_COUNT = 50000;
 
 let bucket = storage.bucket(process.env.CLOUD_BUCKET);
 
 // bucket.getFiles({}, (err, files) => {console.log(err,files)});
 bucket.getFiles({}, (err, files) => {
-    if (err) {
-        console.error("!!!!!!!!!! ERROR getting a list of files: " + err);
-    } else {
-        let i = 1;
-        let failedFiles = [];
-        files.forEach(file => {
-            //  TODO - for now terminate after few calls - debugging time
-            if (i < 25) {
-                console.log('file #' + i + ': ' + file.name);
-                processOneFile(process.env.CLOUD_BUCKET, file.name)
-                    .then(() => {
-                        console.log('Processed file: ' + file.name);
-                        i++;
-                    })
-                    .catch(function (error) {
-                        console.error('!!!!!!!!!! Error processing file <' + file.name + '> with the error: ' + error);
-                        // TODO: Need to insert retry logic here
-                        failedFiles.push(file);
-                    });
-            }
-        });
-
-        console.log('Processed successfully total of ' + i + " files.");
-    }
+  if (err) {
+    console.error('!!! ERROR listing of files in bucket <: ' + process.env.CLOUD_BUCKET + '>: ' + err);
+  } else {
+    console.log('Bucket <' + process.env.CLOUD_BUCKET + '> contains <' + files.length + '> files.');
+    processFilesAsync(files).then(() => {
+      console.log('# of files processed successfully: ' + successCount);
+    })
+  }
 });
