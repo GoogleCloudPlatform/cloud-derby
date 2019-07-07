@@ -24,12 +24,14 @@ set -e # Exit if error is detected during pipeline execution
 
 source ../../setenv-global.sh
 
+# This is the original bucket with images to be processed
 #export CLOUD_BUCKET="robot-derby-backup"
 export CLOUD_BUCKET="images-crowdsourcing"
-
-export INFERENCE_IP="104.197.196.4"
-
+# This is where all sorted images will be copied
 export DESTINATION_BUCKET="derby-images-auto-sorted"
+
+# This REST endpoint will be used for making inferences on images for classification purpose
+export INFERENCE_IP="104.197.196.4"
 
 ###############################################
 # MAIN
