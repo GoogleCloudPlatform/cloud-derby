@@ -79,7 +79,8 @@ EOF
 ##################################################
 generate_id_map_file() {
   echo_my "generate_id_map_file()..."
-  touch list.txt
+  local TRAINING_VALUES = "trainval.txt"
+  touch ${TRAINING_VALUES}
 
   cd xmls
   for file in *.xml
@@ -124,24 +125,26 @@ generate_id_map_file() {
             ;;
       esac
 
-      echo "$NAME $CLASS $KIND $TYPE" >> ../list.txt
+      echo "$NAME $CLASS $KIND $TYPE" >> ../${TRAINING_VALUES}
   done
 
-  # Split the file generated above into two files "test.txt" and "trainval.txt"
-  cd ..
-  touch test.txt
-  touch trainval.txt
+  # TODO - this code below may not be needed as it does not appear that any of these two files are being used
 
-  local flag=0
-  while IFS='' read -r line || [[ -n "$line" ]]; do
-      if ((flag)) # every other line goes into a separate file
-      then
-          echo "$line" >> test.txt
-      else
-          echo "$line" >> trainval.txt
-      fi
-      flag=$((1-flag))
-  done < "list.txt"
+  # Split the file generated above into two files
+#  cd ..
+#  touch test.txt
+#  touch trainval.txt
+#
+#  local flag=0
+#  while IFS='' read -r line || [[ -n "$line" ]]; do
+#      if ((flag)) # every other line goes into a separate file
+#      then
+#          echo "$line" >> test.txt
+#      else
+#          echo "$line" >> trainval.txt
+#      fi
+#      flag=$((1-flag))
+#  done < "list.txt"
 }
 
 ##################################################
