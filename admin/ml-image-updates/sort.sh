@@ -36,23 +36,13 @@ export DESTINATION_BUCKET="derby-images-sorted-by-score"
 print_header "Starting image sort process by score"
 
 mkdir -p tmp
-CWD=$(pwd)
-# Location where the install flag is set to avoid repeated installs
-INSTALL_FLAG=$CWD/tmp/install.marker
-
-if [ -f "$INSTALL_FLAG" ]; then
-  echo_my "File '$INSTALL_FLAG' was found = > no need to do the install since it already has been done."
-else
-  install_node
-  touch $INSTALL_FLAG
-fi
 
 # The service account is needed to get permissions to create resources
 gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
 
-cd $CWD/js
+cd js
 
 export GOOGLE_APPLICATION_CREDENTIALS=$SERVICE_ACCOUNT_SECRET
-node sort.js
+nohup node sort.js &
 
 print_footer "Image sort by score has completed OK."

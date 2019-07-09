@@ -78,7 +78,7 @@ async function processOneFileAsync(srcBucket, srcFile) {
  - destination GCS URI
  ************************************************************/
 async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
-  console.log('Copy from <gs:' + srcBucket + '//' + srcFile + '> to <gs://' + destBucket + '/' + destFile + '>');
+  console.log('Copy from <gs://' + srcBucket + '/' + srcFile + '> to <gs://' + destBucket + '/' + destFile + '>');
   await storage.bucket(srcBucket).file(srcFile).copy(storage.bucket(destBucket).file(destFile))
   .catch(function (error) {
     console.error('!!!!!!!!!!!!! ERROR: Failed to copy a file: ' + destFile + ' with error: ' + error);
