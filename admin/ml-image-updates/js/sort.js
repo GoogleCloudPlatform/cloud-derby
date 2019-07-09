@@ -68,6 +68,19 @@ async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
 }
 
 /************************************************************
+ Delete file from the bucket
+ Input:
+ - source GCS URI
+ ************************************************************/
+async function gcsDelete(bucket, file) {
+  // console.log('Deleting file: '+file);
+  storage.bucket(bucket).file(file).delete()
+  .catch(function (error) {
+    console.error("!!!!!!!!!!!! Failed to delete a file: " + error);
+  });
+}
+
+/************************************************************
  Recursively process list of files
  Input:
  - List of files to be processed
@@ -76,16 +89,17 @@ async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
  ************************************************************/
 async function processFilesAsync(files) {
   for (let file of files) {
-    console.log('#' + progressCount );
+    console.log('#' + progressCount);
     progressCount++;
     let newName = createNewName(file.name);
-    // console.log('-----------------------------------------------> ' + newName);
     
+    // TODO - this needs to be async, but in batches so as to not overflow the memory for 80,000+ files
     await gcsCopy(SOURCE_BUCKET, file.name, DESTINATION_BUCKET, newName)
     .then(() => {
+      gcsDelete(SOURCE_BUCKET, file.name);
       console.log('completed ' + successCount);
-      // console.log('completed ' + successCount + ': ' + 'Copy from <gs://' + SOURCE_BUCKET + '/' + file.name + '> to' +
-      //   ' <gs://' + DESTINATION_BUCKET + '/' + newName + '>');
+      // console.log('completed ' + successCount + ': ' + 'Copy from <gs://' + SOURCE_BUCKET + '/' + file.name + '> to'
+      // + ' <gs://' + DESTINATION_BUCKET + '/' + newName + '>');
       successCount++;
     })
     .catch(function (error) {
