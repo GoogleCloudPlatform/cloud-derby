@@ -60,7 +60,7 @@ function createNewName(fileName) {
  - destination GCS URI
  ************************************************************/
 async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
-  console.log('Copy from <gs://' + srcBucket + '/' + srcFile + '> to <gs://' + destBucket + '/' + destFile + '>');
+  // console.log('Copy from <gs://' + srcBucket + '/' + srcFile + '> to <gs://' + destBucket + '/' + destFile + '>');
   await storage.bucket(srcBucket).file(srcFile).copy(storage.bucket(destBucket).file(destFile))
   .catch(function (error) {
     console.error('!!!!!!!!!!!!! ERROR: Failed to copy a file: ' + destFile + ' with error: ' + error);
@@ -76,14 +76,16 @@ async function gcsCopy(srcBucket, srcFile, destBucket, destFile) {
  ************************************************************/
 async function processFilesAsync(files) {
   for (let file of files) {
-    console.log('--- #' + progressCount );
+    console.log('#' + progressCount );
     progressCount++;
     let newName = createNewName(file.name);
     // console.log('-----------------------------------------------> ' + newName);
     
     await gcsCopy(SOURCE_BUCKET, file.name, DESTINATION_BUCKET, newName)
     .then(() => {
-      console.log('done: #' + successCount + ': ' + file.name + ' to ' + newName);
+      console.log('completed ' + successCount);
+      // console.log('completed ' + successCount + ': ' + 'Copy from <gs://' + SOURCE_BUCKET + '/' + file.name + '> to' +
+      //   ' <gs://' + DESTINATION_BUCKET + '/' + newName + '>');
       successCount++;
     })
     .catch(function (error) {
