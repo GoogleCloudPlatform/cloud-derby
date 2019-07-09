@@ -79,7 +79,7 @@ EOF
 ##################################################
 generate_id_map_file() {
   echo_my "generate_id_map_file()..."
-  local TRAINING_VALUES = "trainval.txt"
+  local TRAINING_VALUES="trainval.txt"
   touch ${TRAINING_VALUES}
 
   cd xmls
