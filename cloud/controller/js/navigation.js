@@ -543,7 +543,7 @@ module.exports = class Navigation {
     // size ratio of object
     let expectedRatio = realObjectVerticalSizeMm / realObjectHorizontalSizeMm;
     let visibleRatio = bBox.h / bBox.w;
-    let debug = "Object visibility: expectedRatio=" + expectedRatio.toFixed(4) + ", visibleRatio="+visibleRatio.toFixed(4));
+    let debug = "Object visibility: expectedRatio=" + expectedRatio.toFixed(4) + ", visibleRatio="+visibleRatio.toFixed(4);
     
     // Depending if we see more of a width vs height use that for calculations
     if (expectedRatio < visibleRatio) {
