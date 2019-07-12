@@ -331,6 +331,14 @@ if __name__ == '__main__':
                     if ((key is not None) and (key == '<ESC>')):
                         break
 
+                if (mode=="automatic"):
+                    myCar.SetCarModeLED(myCar.GREEN)
+                elif (mode=="manual"):
+                    myCar.SetCarModeLED(myCar.BLUE)
+                elif (mode=="debug"):
+                    myCar.SetCarModeLED(myCar.RED)
+
+
                 # process any new commands in the queue
                 if (len(action_queue) > 0):
                     action_sequence_complete = False
@@ -364,6 +372,19 @@ if __name__ == '__main__':
                         elif (action_type == "setColor"):
                             print("main(): set color to " + str(action_value))
                             ball_color = str(action_value)
+
+                            if (ball_color=="Red"):
+                                myCar.SetBallModeLED(myCar.RED)
+                            elif (ball_color=="Yellow"):
+                                myCar.SetBallModeLED(myCar.YELLOW)
+                            elif (ball_color=="Green"):
+                                myCar.SetBallModeLED(myCar.GREEN)
+                            elif (ball_color=="Blue"):
+                                myCar.SetBallModeLED(myCar.BLUE)
+                            else:
+                                print("main(): Invalid ball color received")
+
+
                             print("main(): After changing the color of the ball, # of collected balls reset to 0")
                             balls_collected = 0
                         elif (action_type == "setSpeed"):
@@ -397,7 +418,7 @@ if __name__ == '__main__':
                     distance = myCar.ReadDistanceMM()
                     print("main(): distance Sensor (mm): " + str(distance))
                     # Sleep briefly before taking a photo to prevent blurry images
-                    myCar.SetLEDsYellow()
+                    myCar.SetCarStatusLED(myCar.YELLOW)
                     time.sleep(0.1)
                     gcs_image_url, public_image_url = takephoto(project_var,bucket_var, camera_position)
                     print("main(): image URL: " + str(public_image_url))
@@ -429,7 +450,7 @@ if __name__ == '__main__':
                     # In case we are in a single message sensorRate - mark this message as being sent to prevent more messages
                     send_next_message = False
                     print("main()----------------------> msg published to the cloud")
-                    myCar.SetLEDsGreen()
+                    myCar.SetCarStatusLED(myCar.GREEN)
                 else:
                     time.sleep(2)
 
