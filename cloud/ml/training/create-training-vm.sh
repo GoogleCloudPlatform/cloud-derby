@@ -1,5 +1,10 @@
 #!/bin/bash
 
+###############################################
+# This script creates a GCE VM used for training using
+# transfer learning object detection with GPU.
+###############################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -15,11 +20,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-###############################################
-# For transferred learning object detection to work we need a GPU enabled VM on GCE.
-# This script creates such a VM
-###############################################
 
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
@@ -171,22 +171,6 @@ create_gpu_vm()
 
   echo_my "List of my instances..."
   gcloud compute --project="$PROJECT" instances list
-
-  # echo_my "Copy basic project files to the VM so it is easier to clone the repo later..."
-  # local LOCAL_DIR=$TMP/host-files
-  # rm -rf $LOCAL_DIR | true # ignore if it does not exist
-  # mkdir -p $LOCAL_DIR
-
-  # Dynamicaly generate correct scripts so we can copy those scripts to the remote VM
-  # echo "source setenv-local.sh" > $LOCAL_DIR/clone-repo.sh
-
-  # Note that we want $PROJECT_PATH to be written as such and not substituted with a real value, hence the escape character \ before $
-  # echo "git clone $GITHUB_REPO_URL \$PROJECT_PATH" >> $LOCAL_DIR/clone-repo.sh
-
-  # cp $HOME/setenv-local.sh $LOCAL_DIR
-  # chmod u+x $LOCAL_DIR/*.sh
-  # REMOTE_DIR="~/"
-  # remote_copy $LOCAL_DIR $REMOTE_DIR $ZONE $VM_NAME
 }
 
 #############################################

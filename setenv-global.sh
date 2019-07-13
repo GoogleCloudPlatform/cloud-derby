@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#############################################################################
+# Shared environment variables and utility functions for entire project
+#############################################################################
 #
 # Copyright 2018 Google LLC
 #
@@ -14,11 +17,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-#############################################################################
-# Shared environment variables and utility functions for entire project
-#############################################################################
 echo "setenv-global.sh: start..."
 
 command -v bc >/dev/null 2>&1 || { echo >&2 "'bc' is not installed."; yes | sudo apt-get --assume-yes install bc; }
@@ -29,8 +28,8 @@ set -u # This prevents running the script if any of the variables have not been 
 set -e # Exit if error is detected during pipeline execution
 
 ### Camera resolution
-export HORIZONTAL_RESOLUTION_PIXELS=1024
-export VERTICAL_RESOLUTION_PIXELS=576
+export HORIZONTAL_RESOLUTION_PIXELS="1024"
+export VERTICAL_RESOLUTION_PIXELS="576"
 
 ### Demo project with the inference VM running at all times for use by anyone
 export DEMO_PROJECT="robot-derby-demo-1"
@@ -49,60 +48,65 @@ export SERVICE_ACCOUNT="cloud-derby-dev"
 export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
 
 ### Topic where cloud logic sends driving commands to and car reads them from here
-export COMMAND_TOPIC=driving-commands-topic-$CAR_ID
+export COMMAND_TOPIC="driving-commands-topic-$CAR_ID"
 
 ### Topic where the car sends its sensor data and cloud logic reads it from
-export SENSOR_TOPIC=sensor-data-topic-$CAR_ID
+export SENSOR_TOPIC="sensor-data-topic-$CAR_ID"
 
 ### Subscription on the above sensor topic for cloud logic to read data from the car
-export SENSOR_SUBSCRIPTION=sensor-data-subscription-$CAR_ID
+export SENSOR_SUBSCRIPTION="sensor-data-subscription-$CAR_ID"
 
 ### GCS bucket for car to post its images to and for cloud logic to read it from here
-export CAR_CAMERA_BUCKET=camera-${CAR_ID}-$PROJECT
+export CAR_CAMERA_BUCKET="camera-${CAR_ID}-${PROJECT}"
 
 ### IOT Core registry where the car sends its sensor data and cloud logic reads it from
-export IOT_CORE_REGISTRY=car-iot-registry
+export IOT_CORE_REGISTRY="car-iot-registry"
 
 ### IOT Core Device ID
-export IOT_CORE_DEVICE_ID=iot-car-$CAR_ID
+export IOT_CORE_DEVICE_ID={iot-car-$CAR_ID}
 
 ### Inference IP address logical name
-export ML_IP_NAME=ml-static-ip-$VERSION
+export ML_IP_NAME="ml-static-ip-$VERSION"
 
 ### This URL will be appended to the VM IP address to call Inference Vision API
 export INFERENCE_URL="/v1/objectInference"
 
 ### Credentials to call Inference App
-export INFERENCE_USER_NAME=robot
-export INFERENCE_PASSWORD=gcp4all
+export INFERENCE_USER_NAME="robot"
+export INFERENCE_PASSWORD="gcp4all"
 
 ### Firewal tags
 # HTTP_PORT is used to run Inference VM app to serve REST requests
-export HTTP_PORT=8082
-export HTTP_TAG=http-from-all
-export SSH_TAG=ssh-from-all
+export HTTP_PORT="8082"
+export HTTP_TAG="http-from-all"
+export SSH_TAG="ssh-from-all"
 
 ### VM network name for diagnostics and debug
 export VM_NAME=$(uname -n)
 
 ### Labels and IDs of objects to be recognized
-export NUM_CLASSES=8
-export BLUE_BALL_ID=1
-export BLUE_BALL_LABEL=BlueBall
-export RED_BALL_ID=2
-export RED_BALL_LABEL=RedBall
-export YELLOW_BALL_ID=3
-export YELLOW_BALL_LABEL=YellowBall
-export GREEN_BALL_ID=4
-export GREEN_BALL_LABEL=GreenBall
-export BLUE_HOME_ID=5
-export BLUE_HOME_LABEL=BlueHome
-export RED_HOME_ID=6
-export RED_HOME_LABEL=RedHome
-export YELLOW_HOME_ID=7
-export YELLOW_HOME_LABEL=YellowHome
-export GREEN_HOME_ID=8
-export GREEN_HOME_LABEL=GreenHome
+export NUM_CLASSES="8"
+export BALL_LABEL_SUFFIX="Ball"
+export HOME_LABEL_SUFFIX="Home"
+
+export BLUE_BALL_ID="1"
+export BLUE_BALL_LABEL="Blue$BALL_LABEL_SUFFIX"
+export RED_BALL_ID="2"
+export RED_BALL_LABEL="Red$BALL_LABEL_SUFFIX"
+export YELLOW_BALL_ID="3"
+export YELLOW_BALL_LABEL="Yellow$BALL_LABEL_SUFFIX"
+export GREEN_BALL_ID="4"
+export GREEN_BALL_LABEL="Green$BALL_LABEL_SUFFIX"
+export BLUE_HOME_ID="5"
+export BLUE_HOME_LABEL="Blue$HOME_LABEL_SUFFIX"
+export RED_HOME_ID="6"
+export RED_HOME_LABEL="Red$HOME_LABEL_SUFFIX"
+export YELLOW_HOME_ID="7"
+export YELLOW_HOME_LABEL="Yellow$HOME_LABEL_SUFFIX"
+export GREEN_HOME_ID="8"
+export GREEN_HOME_LABEL="Green$HOME_LABEL_SUFFIX"
+
+export ALL_OBJECT_LABELS="$BLUE_BALL_LABEL $RED_BALL_LABEL $YELLOW_BALL_LABEL $GREEN_BALL_LABEL $BLUE_HOME_LABEL $RED_HOME_LABEL $YELLOW_HOME_LABEL $GREEN_HOME_LABEL"
 
 ###############################################
 # Wait for user input
@@ -144,13 +148,13 @@ start_timer()
 ###############################################
 measure_timer()
 {
-    if [ -z ${START_TIME+x} ]; then
-        MEASURED_TIME=0
-    else
-        END_TIME=$(date +%s)
-        local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
-        MEASURED_TIME=$(printf "%.2f\n" $TIMER)
-    fi
+  if [ -z ${START_TIME+x} ]; then
+    MEASURED_TIME=0
+  else
+    END_TIME=$(date +%s)
+    local TIMER=$(echo "$END_TIME - $START_TIME" | bc)
+    MEASURED_TIME=$(printf "%.2f\n" $TIMER)
+  fi
 }
 
 ###############################################
@@ -219,7 +223,7 @@ echo_my()
 	if [ $ECHO_REQUESTED = $ECHO_DEBUG ]; then PREFIX="${ORANGE}[DEBUG] ${PREFIX}"; fi
 	if [ $ECHO_REQUESTED = $ECHO_NO_PREFIX ]; then PREFIX="${GREEN}"; fi
 
-    measure_timer
+  measure_timer
 	printf "${PREFIX}$1 ($MEASURED_TIME seconds)${NORMAL}\n"
 }
 
@@ -228,29 +232,59 @@ echo_my()
 ###############################################
 create_resources()
 {
-    echo_my "Create Topics and Subscriptions for car to cloud communication..."
+  echo_my "Create Topics and Subscriptions for car to cloud communication..."
 
-    if gcloud pubsub topics list | grep $COMMAND_TOPIC; then
-	    echo_my "Topic $COMMAND_TOPIC found OK"
+  if gcloud pubsub topics list | grep $COMMAND_TOPIC; then
+    echo_my "Topic $COMMAND_TOPIC found OK"
+  else
+    echo_my "Create PubSub topic '$COMMAND_TOPIC'..."
+    gcloud pubsub topics create $COMMAND_TOPIC
+  fi
+
+  if gcloud pubsub topics list | grep $SENSOR_TOPIC; then
+    echo_my "Topic $SENSOR_TOPIC found OK"
+  else
+    echo_my "Create PubSub topic '$SENSOR_TOPIC'..."
+    gcloud pubsub topics create $SENSOR_TOPIC
+  fi
+
+  if gcloud pubsub subscriptions list | grep $SENSOR_SUBSCRIPTION; then
+    echo_my "Drop and create subscription for sensor data to avoid processing of old messages..."
+    gcloud pubsub subscriptions delete $SENSOR_SUBSCRIPTION
+  fi
+
+  echo_my "Creating a subscription '$SENSOR_SUBSCRIPTION'..."
+  gcloud pubsub subscriptions create $SENSOR_SUBSCRIPTION --topic $SENSOR_TOPIC
+}
+
+###############################################
+# Install Node and NPM
+###############################################
+install_node()
+{
+  if which sw_vers; then
+    echo "MAC OS found"
+    if which node; then
+      echo "node and npm are already installed"
     else
-        echo_my "Create PubSub topic '$COMMAND_TOPIC'..."
-        gcloud pubsub topics create $COMMAND_TOPIC
+      echo "Please install and configure nodeJS as described here: https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/"
+      exit 1
     fi
+  else
+    lsb_release -a
+    echo "We are running on Linux"
+    echo_my "Downloading 'node'..."
+    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    echo_my "Installing 'node'..."
+    sudo apt-get install nodejs
+  fi
 
-    if gcloud pubsub topics list | grep $SENSOR_TOPIC; then
-	    echo_my "Topic $SENSOR_TOPIC found OK"
-    else
-        echo_my "Create PubSub topic '$SENSOR_TOPIC'..."
-	    gcloud pubsub topics create $SENSOR_TOPIC
-    fi
-
-    if gcloud pubsub subscriptions list | grep $SENSOR_SUBSCRIPTION; then
-        echo_my "Drop and create subscription for sensor data to avoid processing of old messages..."
-    	gcloud pubsub subscriptions delete $SENSOR_SUBSCRIPTION
-    fi
-
-    echo_my "Creating a subscription '$SENSOR_SUBSCRIPTION'..."
-    gcloud pubsub subscriptions create $SENSOR_SUBSCRIPTION --topic $SENSOR_TOPIC
+  node -v
+  npm -v
+  cd js
+  echo_my "Installing npm modules..."
+  npm install
+  # npm install --save @google-cloud/debug-agent @google-cloud/bigquery
 }
 
 echo "setenv-global.sh: done"

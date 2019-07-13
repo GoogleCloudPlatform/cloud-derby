@@ -23,7 +23,7 @@
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
-source ./hackathon.sh
+source ./setenv.sh
 
 ### File with the list of user names and passwords
 USER_LIST="$TMP/users.csv"

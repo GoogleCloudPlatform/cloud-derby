@@ -486,7 +486,8 @@ router.post('/messages/debug', validate.debugMessageParams, (req, res) => {
   
   // sendCommand
   if (req.body.sendCommand) {
-    // Before we send the current message to the car, we need to make sure we add one action - that is to send sensor message after processing other actions
+    // Before we send the current message to the car, we need to make sure we add one action - that is to send sensor
+    // message after processing other actions
     if (nextDrivingCommand === undefined) {
       // If there were no instructions to begin with, then we will create an empty command
       command = new DriveMessage();
@@ -586,7 +587,8 @@ app.post('/debug_submit', (req, res) => {
   
   console.log('debug_submit(): User wants to send current command to the car');
   
-  // Before we send the current message to the car, we need to make sure we add one action - that is to send sensor message after processing other actions
+  // Before we send the current message to the car, we need to make sure we add one action - that is to send sensor
+  // message after processing other actions
   if (nextDrivingCommand === undefined) {
     // If there were no instructions to begin with, then we will create an empty command
     command = new DriveMessage();

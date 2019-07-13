@@ -155,12 +155,10 @@ module.exports = class Navigation {
     return (new Vision()).recognizeObjects(sensorMessage)
     .then((response) => {
       // Compose the object label as identified by Object Detection API (aka "red_ball", etc.)
-      // console.log("navigate2ball(): Getting the objectLabel...");
       let objectLabel = sensorMessage.carState.color + Settings.BALL_LABEL_SUFFIX;
       
       // Find the ball nearest to the car by using the label we composed above
       // Note that Vision API needs to be using proper image labels so we can find what we need
-      // console.log("navigate2ball(): Finding nearest object");
       let bBox = this.findNearestObject(objectLabel, response);
       
       let command;
@@ -543,7 +541,7 @@ module.exports = class Navigation {
     // size ratio of object
     let expectedRatio = realObjectVerticalSizeMm / realObjectHorizontalSizeMm;
     let visibleRatio = bBox.h / bBox.w;
-    let debug = "Object visibility: expectedRatio=" + expectedRatio.toFixed(4) + ", visibleRatio="+visibleRatio.toFixed(4));
+    let debug = "Object visibility: expectedRatio=" + expectedRatio.toFixed(4) + ", visibleRatio="+visibleRatio.toFixed(4);
     
     // Depending if we see more of a width vs height use that for calculations
     if (expectedRatio < visibleRatio) {
