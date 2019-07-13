@@ -85,6 +85,8 @@ else
     export TEST_IMAGE_FILE=""
 fi
 
+export GOOGLE_APPLICATION_CREDENTIALS=$SERVICE_ACCOUNT_SECRET
+
 # Local directory where test images
 export TEST_IMAGE_FOLDER=simulation-images
 
