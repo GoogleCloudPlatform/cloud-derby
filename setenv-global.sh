@@ -63,10 +63,10 @@ export CAR_CAMERA_BUCKET="camera-${CAR_ID}-${PROJECT}"
 export IOT_CORE_REGISTRY="car-iot-registry"
 
 ### IOT Core Device ID
-export IOT_CORE_DEVICE_ID={iot-car-$CAR_ID}
+export IOT_CORE_DEVICE_ID="iot-car-${CAR_ID}"
 
 ### Inference IP address logical name
-export ML_IP_NAME="ml-static-ip-$VERSION"
+export ML_IP_NAME="ml-static-ip-${VERSION}"
 
 ### This URL will be appended to the VM IP address to call Inference Vision API
 export INFERENCE_URL="/v1/objectInference"
