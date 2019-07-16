@@ -184,6 +184,7 @@ create_groups_and_users
 
 create_folders
 
-# update_permissions
+# This is debugging step if any additional permissions need to be granted
+#update_permissions
 
 print_footer "SUCCESS: New workshop configuration created."
