@@ -292,7 +292,7 @@ if __name__ == '__main__':
     client.on_message = device.on_message
 
     # Connect to the Google MQTT bridge.
-    client.connect("mqtt.googleapis.com", int(8883))
+    client.connect("mqtt.googleapis.com", int(443))
 
     client.loop_start()
 
