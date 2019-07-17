@@ -32,19 +32,18 @@ USER_LIST="$TMP/users.csv"
 # Create special Read Only group 
 ###############################################################################
 create_read_only_group() {
-    # Create read only group
+    echo_my "Create read only group..."
     $GAM create group "$ADMIN_READ_GROUP" name "Resource Read-Only group" description "Read only access to common resources" | true # ignore if error
-    # Permissions for things outside the team folder
+    echo_my "Permissions for things outside the team folder..."
     COMMAND="gcloud projects add-iam-policy-binding $ADMIN_PROJECT_ID --member=group:$ADMIN_READ_GROUP --role=roles/"
-    # All users need to be able to read the source repo
-    eval ${COMMAND}source.reader
-    # All users need to be able to read pre-annotated images
+
+    echo_my "All users need to be able to read pre-annotated images..."
     eval ${COMMAND}storage.objectViewer
-    # All users need to be able to use Windows VM image we provide for annotations with some software pre-installed on it
+
+    echo_my "All users need to be able to use Windows VM image we provide for annotations with some software pre-installed on it..."
     eval ${COMMAND}compute.imageUser
 
-    # All users need to be able to lookup IP address of the DEMO Inference VM
-    #  TODO - check why there are no permissions to lookup IP address in demo project
+    echo_my "All users need to be able to lookup IP address of the DEMO Inference VM..."
     gcloud projects add-iam-policy-binding $DEMO_PROJECT --member=group:$ADMIN_READ_GROUP --role="roles/compute.networkUser"
 }
 
@@ -247,11 +246,13 @@ clouddebugger.debuggees.create,\
 clouddebugger.debuggees.list"
 
   gcloud beta iam roles create $DERBY_DEV_ROLE \
-    --project $ADMIN_PROJECT_ID \
+    --organization $(lookup_org_id) \
     --title "Cloud Derby Developer Role" \
     --description "Access to resources needed to develop and deploy Cloud Derby" \
     --stage "GA" \
     --permissions $PERMISSIONS
+
+  sleep 3
 }
 
 ###############################################################################
@@ -261,11 +262,11 @@ print_header "Creating workshop users, folders, etc..."
 
 setup
 
-create_read_only_group
+#create_read_only_group
 
 create_role
 
-create_groups_and_users
+#create_groups_and_users
 
 create_folders
 
