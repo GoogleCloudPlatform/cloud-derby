@@ -120,7 +120,7 @@ create_folders() {
 
         # See docs: https://cloud.google.com/iam/docs/understanding-roles
         gcloud alpha resource-manager folders add-iam-policy-binding $NEW_FOLDER_ID \
-            --member=group:$(team_name $i)@$DOMAIN --role="projects/$ADMIN_PROJECT_ID/roles/$DERBY_DEV_ROLE"
+		--member=group:$(team_name $i)@$DOMAIN --role="organizations/$(lookup_org_id)/roles/$DERBY_DEV_ROLE"
     done
 }
 
