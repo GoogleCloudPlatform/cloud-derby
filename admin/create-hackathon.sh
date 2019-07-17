@@ -128,7 +128,7 @@ create_folders() {
 # Create Special Cloud Derby Role
 #############################################
 create_role() {
-  if gcloud beta iam roles list --project $ADMIN_PROJECT_ID | grep -q $DERBY_DEV_ROLE; then
+  if gcloud iam roles list --organization $(lookup_org_id) | grep -q $DERBY_DEV_ROLE; then
     echo "Role '$DERBY_DEV_ROLE' already exists."
     return
   fi
