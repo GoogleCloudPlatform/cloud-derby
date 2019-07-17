@@ -21,23 +21,10 @@ set -e # Exit if error is detected during pipeline execution
 
 source ./setenv.sh
 
-###############################################
-# Main
-###############################################
-if [ -f "$SERVICE_ACCOUNT_SECRET" ]; then
-  echo_my "Activating service account..."
-  gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
-fi
-
-rm nohup.out | true
-
-
 set_python_path
 
-echo "Start Tensorboard..."
+echo "Starting Tensorboard..."
 nohup tensorboard --logdir=${GCS_ML_BUCKET} --port=$TF_HTTP_PORT &
-
-echo "This script will not work on C9 VM. It needs to run on GCE or other VM. If running on GCE VM - please make sure the port above is open"
 
 sleep 2
 

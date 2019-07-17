@@ -24,7 +24,7 @@
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
-source ./hackathon.sh
+source ./setenv.sh
 
 # Where do we want to copy all these images
 DESTINATION_BUCKET="crowd-sourced-images-archive"

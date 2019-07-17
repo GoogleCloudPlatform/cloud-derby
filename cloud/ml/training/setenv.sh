@@ -1,5 +1,9 @@
 #!/bin/bash
 
+###############################################################
+# Shared environment variables for Transferred Learning module
+###############################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -15,10 +19,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-###########################################################
-# Shared environment variables for Transferred Learning module
-###########################################################
 
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
@@ -39,8 +39,6 @@ MODEL=faster_rcnn_resnet101_coco_2018_01_28
 MODEL_CONFIG=${MODEL}-cloud-derby.config
 
 ### Which dataset to use
-TL_MODULE_PATH=$(pwd)
-MODEL_CONFIG_PATH=$TL_MODULE_PATH
+MODEL_CONFIG_PATH=$(pwd)
 
-### TensorBoard HTTP PORT
 export TF_HTTP_PORT=8081

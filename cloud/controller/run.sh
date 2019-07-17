@@ -1,8 +1,10 @@
 #!/bin/bash
 
-###############################################
+###############################################################
 # Car Driving Controller
-###############################################
+# Can be run locally as node process or deployed into GAE
+###############################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -64,21 +66,21 @@ env_variables:
     CAR_ID: $CAR_ID
     BALL_LABEL_SUFFIX: $BALL_LABEL_SUFFIX
     HOME_LABEL_SUFFIX: $HOME_LABEL_SUFFIX
-    BLUE_BALL_LABEL: Blue$BALL_LABEL_SUFFIX
-    RED_BALL_LABEL: Red$BALL_LABEL_SUFFIX
-    YELLOW_BALL_LABEL: Yellow$BALL_LABEL_SUFFIX
-    GREEN_BALL_LABEL: Green$BALL_LABEL_SUFFIX
-    BLUE_HOME_LABEL: Blue$HOME_LABEL_SUFFIX
-    RED_HOME_LABEL: Red$HOME_LABEL_SUFFIX
-    YELLOW_HOME_LABEL: Yellow$HOME_LABEL_SUFFIX
-    GREEN_HOME_LABEL: Green$HOME_LABEL_SUFFIX
+    BLUE_BALL_LABEL: $BLUE_BALL_LABEL
+    RED_BALL_LABEL: $RED_BALL_LABEL
+    YELLOW_BALL_LABEL: $YELLOW_BALL_LABEL
+    GREEN_BALL_LABEL: $GREEN_BALL_LABEL
+    BLUE_HOME_LABEL: $BLUE_HOME_LABEL
+    RED_HOME_LABEL: $RED_HOME_LABEL
+    YELLOW_HOME_LABEL: $YELLOW_HOME_LABEL
+    GREEN_HOME_LABEL: $GREEN_HOME_LABEL
 EOF
 }
 
 ###############################################
 # MAIN
 ###############################################
-print_header "Start application '$APP_NAME'"
+print_header "Starting application '$APP_NAME'"
 
 mkdir -p tmp
 CWD=$(pwd)
@@ -92,17 +94,11 @@ else
   touch $INSTALL_FLAG
 fi
 
-# The service account is needed to get permissions to create resources
-# TODO - verify permissions to allow deployment into the GAE
-#gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
-
 create_resources
 
 # Lookup actual IP address for inference VM from the static reference
 if $USE_DEMO_INFERENCE ; then
   # Driving controller will be using the inference VM that has been stood up in advance in a different project
-#  TODO - check why there are no permissions to lookup IP address in demo project
-# TODO - verify why demo inference VM has permission issue with access to images in other projects
   export INFERENCE_IP=$(gcloud compute addresses describe $DEMO_INFERENCE_IP_NAME --region us-central1 --format="value(address)" --project $DEMO_PROJECT)
 else
   # Find the IP of the inference VM that was created in this project
@@ -111,9 +107,6 @@ fi
 echo_my "INFERENCE_IP=$INFERENCE_IP"
 
 cd $CWD/js
-if [ -f "nohup.out" ] ; then
-  rm -rf nohup.out
-fi
 
 if $DRIVING_CONTROLLER_LOCAL ;
 then
@@ -124,10 +117,10 @@ then
 else
   generate_yaml
   URL=https://${APP_NAME}-dot-${PROJECT}.appspot.com/
-  echo_my "Deploying into GCP App Engine (used for production)..."
+  echo_my "Deploying into Google App Engine..."
   yes | gcloud app deploy $YAML_FILE --project $PROJECT
   # Ping the app to see if it is available
-  curl -G $URL
+  curl -G "${URL}"
   echo_my "Running on GCP URL=$URL"
 fi
 

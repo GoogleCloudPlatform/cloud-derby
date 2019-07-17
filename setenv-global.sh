@@ -3,6 +3,7 @@
 #############################################################################
 # Shared environment variables and utility functions for entire project
 #############################################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -35,6 +36,9 @@ export VERTICAL_RESOLUTION_PIXELS="576"
 export DEMO_PROJECT="robot-derby-demo-1"
 export DEMO_INFERENCE_IP_NAME="ml-static-ip-47"
 
+### This is the project that hosts reference images and other admin elements
+ADMIN_PROJECT_ID="administration-203923"
+
 ### Name of the source bucket with images of colored balls (this is one source for all other projects)
 export GCS_SOURCE_IMAGES="cloud-derby-pictures"
 
@@ -46,6 +50,7 @@ export SERVICE_ACCOUNT_DIR="$BASE_PATH/.secrets"
 export SERVICE_ACCOUNT_SECRET="$SERVICE_ACCOUNT_DIR/service-account-secret.json"
 export SERVICE_ACCOUNT="cloud-derby-dev"
 export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
+export DERBY_DEV_ROLE="CloudDerbyDeveloperRole"
 
 ### Topic where cloud logic sends driving commands to and car reads them from here
 export COMMAND_TOPIC="driving-commands-topic-$CAR_ID"

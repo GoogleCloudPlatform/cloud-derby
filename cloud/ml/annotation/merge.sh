@@ -1,5 +1,14 @@
 #!/bin/bash
 
+######################################################################
+# This script merges multiple user uploaded images into one archive
+# Example:
+#      ./merge.sh  USER-BUCKET-1  USER-BUCKET-2  USER-BUCKET-3  USER-BUCKET-4
+#
+# In the command below USER-BUCKET-X is the name of the bucket where each of
+# the team members has uploaded their images:
+######################################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -15,15 +24,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-######################################################################
-# This script merges multiple user uploaded images into one archive
-# Example:
-#      ./merge.sh  USER-BUCKET-1  USER-BUCKET-2  USER-BUCKET-3  USER-BUCKET-4
-#
-# In the command below USER-BUCKET-X is the name of the bucket where each of
-# the team members has uploaded their images:
-######################################################################
 
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution

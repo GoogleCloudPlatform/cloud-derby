@@ -44,46 +44,6 @@ create_static_inference_ip()
 }
 
 ###############################################
-# Copy files to remote GCE host. It will try
-# several times if the host is not started yet
-# or not responding.
-# Input:
-#   - Local Dir
-#   - Remote Dir
-#   - Zone
-#   - Destination Host
-###############################################
-remote_copy()
-{
-  local LOCAL_DIR=$1
-  local REMOTE_DIR=$2
-  local ZONE=$3
-  local TARGET_HOST=$4
-  local SLEEP=1
-  local COUNTER=0
-  local MAX_WAIT_COUNT=30
-
-  echo_my "Copying files from local path '$LOCAL_DIR' to remote path '$REMOTE_DIR' in zone '$ZONE' to the host '$TARGET_HOST'..."
-  while true
-  do
-      if gcloud compute scp --zone $ZONE $LOCAL_DIR/* $TARGET_HOST:${REMOTE_DIR} ; then
-          echo_my "File copy from '$LOCAL_DIR' succeeded."
-          break
-      else
-          SLEEP=$(echo "$SLEEP * 2" | bc)
-          echo_my "Remote VM hasn't started yet, waiting for $SLEEP more seconds..."
-          sleep $SLEEP
-          ((COUNTER+=1))
-      fi
-
-      if [ $COUNTER -gt $MAX_WAIT_COUNT ]; then
-          echo_my "Remote VM was not started in reasonable amount of time. Aborting the script." $ECHO_ERROR
-          exit 1
-      fi
-  done
-}
-
-###############################################
 # Open proper ports on a firewall
 ###############################################
 configure_firewall()
@@ -97,7 +57,7 @@ configure_firewall()
 
   # Deep Learning VM has pre-installed Python Lab on port 8080
   open_http_firewall_port 8080
-  
+
   # Open Tensorboard port
   open_http_firewall_port $TF_HTTP_PORT
 

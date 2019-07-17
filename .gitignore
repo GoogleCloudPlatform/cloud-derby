@@ -1,5 +1,6 @@
 # See https://git-scm.com/docs/gitignore
 
+# ------------ Ignore
 **/node_modules
 **/target
 **/tmp
@@ -15,5 +16,7 @@
 **/install.marker
 **/package-lock.json
 **/*service-account.json
+
+# ------------ Do not ignore
 !**/.gitignore
 !**/.cloudignore

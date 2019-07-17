@@ -31,9 +31,6 @@ source ../setenv-global.sh
 ### Billing accound ID used to pay for project resources
 BILLING_ACCOUNT_ID="<set your Billing ID here>"
 
-### This is the project that hosts reference images and other admin elements
-ADMIN_PROJECT_ID="administration-203923"
-
 ### How many teams will participate in the workshop
 NUM_TEAMS=1
 
