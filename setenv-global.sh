@@ -292,4 +292,15 @@ install_node()
   # npm install --save @google-cloud/debug-agent @google-cloud/bigquery
 }
 
+###############################################################################
+# Lookup Org ID from the Domain name
+###############################################################################
+lookup_org_id() {
+    if [ -z ${ORGANIZATION_ID+x} ] ; then
+        ORGANIZATION_ID=$(gcloud organizations list | grep ${DOMAIN} | awk '{print $2}')
+    fi
+
+    echo "$ORGANIZATION_ID"
+}
+
 echo "setenv-global.sh: done"

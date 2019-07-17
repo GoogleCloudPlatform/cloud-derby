@@ -32,7 +32,7 @@ source ../setenv-global.sh
 BILLING_ACCOUNT_ID="<set your Billing ID here>"
 
 ### How many teams will participate in the workshop
-NUM_TEAMS=1
+NUM_TEAMS=2
 
 # In case we need to add extra teams - start with some number, otherwise set it to 1
 TEAM_START_NUM=1
@@ -41,10 +41,10 @@ TEAM_START_NUM=1
 NUM_PEOPLE_PER_TEAM=1
 
 ### Name of the event - to be added to user and group names
-EVENT_NAME="DC3"
+EVENT_NAME="TEST"
 
 ### Folder that holds all project sub-folders for users
-TOP_FOLDER="June-12-$EVENT_NAME"
+TOP_FOLDER="July-17-$EVENT_NAME"
 
 ### Domain name
 DOMAIN="cloudderby.io"
@@ -57,19 +57,6 @@ ADMIN_READ_GROUP="read-only-group@$DOMAIN"
 
 ### GAM is a wonderful OSS tool to manage Users and Groups
 GAM="/home/${USER}/bin/gam/gam"
-
-###############################################################################
-# Lookup Org ID from the Domain name
-# Input:
-#   1 - Domain name
-###############################################################################
-lookup_org_id() {
-    if [ -z ${ORGANIZATION_ID+x} ] ; then
-        ORGANIZATION_ID=$(gcloud organizations list | grep ${DOMAIN} | awk '{print $2}')
-    fi
-
-    echo "$ORGANIZATION_ID"
-}
 
 ###############################################################################
 # Generate team name
