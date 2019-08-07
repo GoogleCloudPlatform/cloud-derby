@@ -30,7 +30,7 @@ source ../../../setenv-global.sh
 source ../setenv-ml.sh
 
 export PATH_TO_LABELS=$MODEL_BASE/object_detection/data/$LABEL_MAP
-export PATH_TO_CKPT=$BASE_PATH/checkpoint_graph_def
+export PATH_TO_CKPT=$PROJECT_DIR/checkpoint_graph_def
 
 ##################################################
 # This changes TF inference model to be used for web app

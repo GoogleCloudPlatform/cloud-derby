@@ -1,8 +1,14 @@
 # See https://git-scm.com/docs/gitignore
 
 # ------------ Ignore
+.secrets
+project-id.sh*
+setenv-local.sh
+checkpoint_graph_def
+tensorflow-models
 **/node_modules
 **/target
+**/build
 **/tmp
 **/.idea
 **/*.pem
@@ -12,10 +18,9 @@
 **/*.old
 **/nohup.out
 **/*.class
-**/app-generated.yml
-**/install.marker
 **/package-lock.json
 **/*service-account.json
+**/app-generated.yml
 
 # ------------ Do not ignore
 !**/.gitignore

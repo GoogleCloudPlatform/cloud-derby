@@ -53,7 +53,7 @@ first_stage_max_proposals=300
 
 ### TF settings
 export TF_PATH=~/tensorflow
-export TF_MODEL_DIR=$BASE_PATH/tensorflow-models
+export TF_MODEL_DIR=$PROJECT_DIR/tensorflow-models
 export MODEL_BASE=$TF_MODEL_DIR/models/research
 export TMP=$(pwd)/tmp
 

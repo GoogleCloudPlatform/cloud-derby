@@ -25,7 +25,11 @@ set -e # Exit if error is detected during pipeline execution
 
 ### Role of the service account, so that we can deploy resources using SA instead of human account
 TMP="tmp"
-PROJECT_NAME_FILE="$HOME/project-id.sh"
+CWD=$(pwd)
+cd ..
+PROJECT_DIR=$(pwd)
+PROJECT_NAME_FILE="${PROJECT_DIR}/project-id.sh"
+cd ${CWD}
 
 ##################################################################################
 # Save project ID into a file
@@ -126,6 +130,25 @@ EOF
   curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS_TOKEN" -d @${TMP}/${PROJECT_JSON_REQUEST} ${GOOGLE_API_URL}
 }
 
+##########################################################################################
+# This installs Docker on Debian Linux
+##########################################################################################
+install_docker() {
+  if which docker; then
+    echo "Docker is already installed - nothing to do."
+    return
+  fi
+  sudo apt-get update
+  sudo apt-get install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+  curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+  sudo apt-key fingerprint 0EBFCD88
+  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+  sudo apt-get update
+  sudo apt-get install docker-ce
+  # Test if this works
+  sudo docker run hello-world
+}
+
 #############################################
 # Create Service Account
 #############################################
@@ -204,8 +227,8 @@ install_gcp_sdk() {
 # Enable APIs for the project
 #############################################
 enable_project_apis() {
-  APIS="ml.googleapis.com \
-    pubsub.googleapis.com \
+#  ml.googleapis.com
+  APIS="pubsub.googleapis.com \
     storage-component.googleapis.com \
     storage-api.googleapis.com \
     compute.googleapis.com \
@@ -286,8 +309,8 @@ else
 fi
 
 # If there is not an environment file yet in the home directory of the user - make a copy
-if ! [ -f $HOME/setenv-local.sh ] ; then
-    cp ./template-setenv-local.sh $HOME/setenv-local.sh
+if ! [ -f ${PROJECT_DIR}/setenv-local.sh ] ; then
+    cp ./template-setenv-local.sh ${PROJECT_DIR}/setenv-local.sh
 fi
 
 source ../setenv-global.sh

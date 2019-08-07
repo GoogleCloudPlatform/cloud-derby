@@ -26,11 +26,14 @@ set -e # Exit if error is detected during pipeline execution
 
 source ../../setenv-global.sh
 
+TMP="$(pwd)/tmp"
+mkdir -p ${TMP}
+
 ### Defines the name of the App Engine Flex App and forms part of URL
 APP_NAME=driving-controller
 
 ### Configuration of the deployment for 
-YAML_FILE=app-generated.yml
+YAML_FILE=${TMP}/app-generated.yml
 
 ###############################################
 # This generates proper YAML connfig for the app
@@ -82,10 +85,9 @@ EOF
 ###############################################
 print_header "Starting application '$APP_NAME'"
 
-mkdir -p tmp
 CWD=$(pwd)
 # Location where the install flag is set to avoid repeated installs
-INSTALL_FLAG=$CWD/tmp/install.marker
+INSTALL_FLAG=${TMP}/install.marker
 
 if [ -f "$INSTALL_FLAG" ]; then
   echo_my "File '$INSTALL_FLAG' was found = > no need to do the install since it already has been done."

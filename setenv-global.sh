@@ -23,7 +23,10 @@ echo "setenv-global.sh: start..."
 
 command -v bc >/dev/null 2>&1 || { echo >&2 "'bc' is not installed."; yes | sudo apt-get --assume-yes install bc; }
 
-source $HOME/setenv-local.sh
+### This is the path to the home directory of the project
+PROJECT_DIR="$HOME/cloud-derby"
+
+source ${PROJECT_DIR}/setenv-local.sh
 
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
@@ -46,7 +49,7 @@ export GCS_SOURCE_IMAGES="cloud-derby-pictures"
 export GCS_IMAGES="${PROJECT}-images-for-training-v-${VERSION}"
 
 ### Store service account private key here
-export SERVICE_ACCOUNT_DIR="$BASE_PATH/.secrets"
+export SERVICE_ACCOUNT_DIR="$PROJECT_DIR/.secrets"
 export SERVICE_ACCOUNT_SECRET="$SERVICE_ACCOUNT_DIR/service-account-secret.json"
 export SERVICE_ACCOUNT="cloud-derby-dev"
 export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
@@ -296,11 +299,11 @@ install_node()
 # Lookup Org ID from the Domain name
 ###############################################################################
 lookup_org_id() {
-    if [ -z ${ORGANIZATION_ID+x} ] ; then
-        ORGANIZATION_ID=$(gcloud organizations list | grep ${DOMAIN} | awk '{print $2}')
-    fi
+  if [ -z ${ORGANIZATION_ID+x} ] ; then
+      ORGANIZATION_ID=$(gcloud organizations list | grep ${DOMAIN} | awk '{print $2}')
+  fi
 
-    echo "$ORGANIZATION_ID"
+  echo "$ORGANIZATION_ID"
 }
 
 echo "setenv-global.sh: done"

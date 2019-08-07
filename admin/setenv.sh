@@ -18,7 +18,6 @@
 
 ##################################################################################
 # Environment settings that are to be kept secret and not exposed to the GitHub repo
-# This file needs to be put into the user $HOME directory.
 ##################################################################################
 
 set -u # This prevents running the script if any of the variables have not been set
@@ -64,7 +63,7 @@ GAM="/home/${USER}/bin/gam/gam"
 #   1 - team number
 ###############################################################################
 team_name() {
-    echo "team${1}${EVENT_NAME}"
+  echo "team${1}${EVENT_NAME}"
 }
 
 ###############################################################################
@@ -74,7 +73,7 @@ team_name() {
 #   2 - team number
 ###############################################################################
 user_name() {
-    echo "user${1}team${2}${EVENT_NAME}"
+  echo "user${1}team${2}${EVENT_NAME}"
 }
 
 ###############################################################################
@@ -83,34 +82,34 @@ user_name() {
 #   1 - team #
 ###############################################################################
 team_folder_name() {
-    echo "Team-${1}-resources"
+  echo "Team-${1}-resources"
 }
 
 ###############################################################################
 # Generate random password
 ###############################################################################
 generate_password() {
-    local PASSWORD_LENGTH=10
-    echo $(gpw 1 $PASSWORD_LENGTH)
+  local PASSWORD_LENGTH=10
+  echo $(gpw 1 $PASSWORD_LENGTH)
 }
 
 ###############################################################################
 # Check prereqs and do install
 ###############################################################################
 setup() {
-    mkdir -p $TMP
-    INSTALL_FLAG=$TMP/install.marker
+  mkdir -p $TMP
+  INSTALL_FLAG=$TMP/install.marker
 
-    if [ -f "$INSTALL_FLAG" ]; then
-      echo_my "Marker file '$INSTALL_FLAG' was found = > no need to do the install."
-    else
-      echo_my "Marker file '$INSTALL_FLAG' was NOT found = > starting one time install."
-      # Password generator
-      sudo apt-get install gpw
-      # GAM is an awesome GSuite management OSS tool: https://github.com/jay0lee/GAM/wiki
-      bash <(curl -s -S -L https://git.io/install-gam)
-      touch $INSTALL_FLAG
-    fi
+  if [ -f "$INSTALL_FLAG" ]; then
+    echo_my "Marker file '$INSTALL_FLAG' was found = > no need to do the install."
+  else
+    echo_my "Marker file '$INSTALL_FLAG' was NOT found = > starting one time install."
+    # Password generator
+    sudo apt-get install gpw
+    # GAM is an awesome GSuite management OSS tool: https://github.com/jay0lee/GAM/wiki
+    bash <(curl -s -S -L https://git.io/install-gam)
+    touch $INSTALL_FLAG
+  fi
 }
 
 ###############################################################################
@@ -119,7 +118,7 @@ setup() {
 #   1 - folder display name
 ###############################################################################
 find_top_folder_id() {
-    echo $(gcloud alpha resource-manager folders list --organization=$(lookup_org_id) \
+  echo $(gcloud alpha resource-manager folders list --organization=$(lookup_org_id) \
         --filter=" displayName=$1" | grep $1 | sed -n -e "s/.* //p")
 }
 
@@ -130,7 +129,7 @@ find_top_folder_id() {
 #   2 - parent folder ID
 ###############################################################################
 find_folder_id() {
-    echo $(gcloud alpha resource-manager folders list --folder=$2 \
+  echo $(gcloud alpha resource-manager folders list --folder=$2 \
         --filter=" displayName=$1" | grep $1 | sed -n -e "s/.* //p")
 }
 

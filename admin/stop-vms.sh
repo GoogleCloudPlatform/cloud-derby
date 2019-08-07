@@ -43,21 +43,21 @@ FOLDERS_FOUND=0
 #   1 - folder ID under which all VMs to be stopped
 ###############################################################################
 scan_folders() {
-    local PARENT_FOLDER_ID=$1
-    local FOLDER_ID
-    FOLDERS_FOUND=$((FOLDERS_FOUND+1))
+  local PARENT_FOLDER_ID=$1
+  local FOLDER_ID
+  FOLDERS_FOUND=$((FOLDERS_FOUND+1))
 
-    echo_my "Scanning projects under folder id '$PARENT_FOLDER_ID'..."
-    scan_projects $PARENT_FOLDER_ID
+  echo_my "Scanning projects under folder id '$PARENT_FOLDER_ID'..."
+  scan_projects $PARENT_FOLDER_ID
 
-    local FOLDER_LIST=$(gcloud alpha resource-manager folders list --folder=$PARENT_FOLDER_ID --format="value(name)")
+  local FOLDER_LIST=$(gcloud alpha resource-manager folders list --folder=$PARENT_FOLDER_ID --format="value(name)")
 
-    while read -r FOLDER_ID; do
-        if [[ ! -z "$FOLDER_ID" ]] ; then
-            echo_my "Recursively processing folders under folder id '$FOLDER_ID'..."
-            scan_folders $FOLDER_ID
-        fi
-    done <<< "$FOLDER_LIST"
+  while read -r FOLDER_ID; do
+      if [[ ! -z "$FOLDER_ID" ]] ; then
+          echo_my "Recursively processing folders under folder id '$FOLDER_ID'..."
+          scan_folders $FOLDER_ID
+      fi
+  done <<< "$FOLDER_LIST"
 }
 
 ###############################################################################
@@ -66,17 +66,17 @@ scan_folders() {
 #   1 - Folder ID
 ###############################################################################
 scan_projects() {
-    echo_my "Scanning projects under folder '$1'..."
-    local PROJECT_LIST=$(gcloud projects list --filter="parent.id=$1" --format="value(projectId)")
-    local PROJ_ID
+  echo_my "Scanning projects under folder '$1'..."
+  local PROJECT_LIST=$(gcloud projects list --filter="parent.id=$1" --format="value(projectId)")
+  local PROJ_ID
 
-    while read -r PROJ_ID; do
-        if [[ ! -z "$PROJ_ID" ]] ; then
-            PROJECTS_FOUND=$((PROJECTS_FOUND+1))
-            echo_my "Processing project id '$PROJ_ID'..."
-            stop_vms $PROJ_ID
-        fi
-    done <<< "$PROJECT_LIST"
+  while read -r PROJ_ID; do
+      if [[ ! -z "$PROJ_ID" ]] ; then
+          PROJECTS_FOUND=$((PROJECTS_FOUND+1))
+          echo_my "Processing project id '$PROJ_ID'..."
+          stop_vms $PROJ_ID
+      fi
+  done <<< "$PROJECT_LIST"
 }
 
 ###############################################################################
@@ -85,32 +85,32 @@ scan_projects() {
 #   1 - project ID
 ###############################################################################
 stop_vms() {
-    local VM_ID
-    local PROJECT_ID=$1
-    echo_my "Scanning VMs for project '$PROJECT_ID'..."
+  local VM_ID
+  local PROJECT_ID=$1
+  echo_my "Scanning VMs for project '$PROJECT_ID'..."
 
-    local VM_LIST=$(gcloud compute instances list --project $PROJECT_ID --format="value(name)")
-    
-    echo $VM_LIST
+  local VM_LIST=$(gcloud compute instances list --project $PROJECT_ID --format="value(name)")
 
-    while read -r VM_ID; do
-        if [[ ! -z "$VM_ID" ]] ; then
-            VMS_TOTAL=$((VMS_TOTAL+1))
-            # Get the zone of the instance
-            local ZONE=$(gcloud compute instances list --filter="name:($VM_ID)" --project $PROJECT_ID --format="value(zone)")
-            local STATUS=$(gcloud compute instances list --filter="name:($VM_ID)" --project $PROJECT_ID --format="value(status)")
-            echo_my "Found VM id '$VM_ID' with status '$STATUS' in project '$PROJECT_ID'"
-            if [ $STATUS = "RUNNING" ] ; then
-                VMS_RUNNING=$((VMS_RUNNING+1))
-                if [ $COUNT_RUNNING_VM_ONLY = false ] ; then
-                    echo_my "Stopping VM id '$VM_ID' in project '$PROJECT_ID'..."
-                    yes | gcloud compute instances stop $VM_ID --project $PROJECT_ID --zone=$ZONE | true # Ignore if error and proceed
-                fi
-            fi
-        else
-            echo_my "No more VMs found in this project"
-        fi
-    done <<< "$VM_LIST"
+  echo $VM_LIST
+
+  while read -r VM_ID; do
+      if [[ ! -z "$VM_ID" ]] ; then
+          VMS_TOTAL=$((VMS_TOTAL+1))
+          # Get the zone of the instance
+          local ZONE=$(gcloud compute instances list --filter="name:($VM_ID)" --project $PROJECT_ID --format="value(zone)")
+          local STATUS=$(gcloud compute instances list --filter="name:($VM_ID)" --project $PROJECT_ID --format="value(status)")
+          echo_my "Found VM id '$VM_ID' with status '$STATUS' in project '$PROJECT_ID'"
+          if [ $STATUS = "RUNNING" ] ; then
+              VMS_RUNNING=$((VMS_RUNNING+1))
+              if [ $COUNT_RUNNING_VM_ONLY = false ] ; then
+                  echo_my "Stopping VM id '$VM_ID' in project '$PROJECT_ID'..."
+                  yes | gcloud compute instances stop $VM_ID --project $PROJECT_ID --zone=$ZONE | true # Ignore if error and proceed
+              fi
+          fi
+      else
+          echo_my "No more VMs found in this project"
+      fi
+  done <<< "$VM_LIST"
 }
 
 ###############################################################################
