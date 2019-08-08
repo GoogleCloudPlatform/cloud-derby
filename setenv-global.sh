@@ -24,7 +24,9 @@ echo "setenv-global.sh: start..."
 command -v bc >/dev/null 2>&1 || { echo >&2 "'bc' is not installed."; yes | sudo apt-get --assume-yes install bc; }
 
 ### This is the path to the home directory of the project
-PROJECT_DIR="$HOME/cloud-derby"
+#PROJECT_DIR="$HOME/cloud-derby"
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+echo "Project directory is set to PROJECT_DIR='$PROJECT_DIR'"
 
 source ${PROJECT_DIR}/setenv-local.sh
 
@@ -53,7 +55,7 @@ export SERVICE_ACCOUNT_DIR="$PROJECT_DIR/.secrets"
 export SERVICE_ACCOUNT_SECRET="$SERVICE_ACCOUNT_DIR/service-account-secret.json"
 export SERVICE_ACCOUNT="cloud-derby-dev"
 export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
-export DERBY_DEV_ROLE="CloudDerbyDeveloperRole"
+export DERBY_DEV_ROLE="CloudDerbyDeveloperRole1"
 
 ### Topic where cloud logic sends driving commands to and car reads them from here
 export COMMAND_TOPIC="driving-commands-topic-$CAR_ID"
