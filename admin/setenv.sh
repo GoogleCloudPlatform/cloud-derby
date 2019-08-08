@@ -37,13 +37,13 @@ NUM_TEAMS=2
 TEAM_START_NUM=1
 
 ### How many people per team
-NUM_PEOPLE_PER_TEAM=1
+NUM_PEOPLE_PER_TEAM=2
 
 ### Name of the event - to be added to user and group names
-EVENT_NAME="TEST"
+EVENT_NAME="AUG"
 
 ### Folder that holds all project sub-folders for users
-TOP_FOLDER="July-17-$EVENT_NAME"
+TOP_FOLDER="August-8-$EVENT_NAME"
 
 ### Domain name
 DOMAIN="cloudderby.io"
