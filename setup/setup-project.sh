@@ -173,7 +173,7 @@ create_service_account() {
 
   echo "Grant $DERBY_DEV_ROLE role to the service account $ALLMIGHTY_SERVICE_ACCOUNT ..."
   gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$ALLMIGHTY_SERVICE_ACCOUNT" \
-      --role="projects/$ADMIN_PROJECT_ID/roles/$DERBY_DEV_ROLE"
+      --role="organizations/$(lookup_org_id)/roles/$DERBY_DEV_ROLE"
 
 #  echo "Grant IoT Admin role..." && sleep $DELAY
 #  gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$ALLMIGHTY_SERVICE_ACCOUNT" \
