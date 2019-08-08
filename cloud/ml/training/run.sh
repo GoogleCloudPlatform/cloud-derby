@@ -245,7 +245,6 @@ EOF
 
 #############################################
 # Generate Model Config file for
-# faster_rcnn_resnet101_coco_11_06_2017
 # Consider this material: http://www.frank-dieterle.de/phd/2_8_1.html
 #############################################
 generate_model_config_faster_rcnn_resnet101() {
@@ -479,37 +478,38 @@ setup_models() {
 	mkdir -p $TF_MODEL_DIR
 	cd $TF_MODEL_DIR
 
-    # Configure dev environment - pull down TF models
-    git clone https://github.com/tensorflow/models.git
-    cd models
-    # object detection master branch has a bug as of 9/21/2018
-    # checking out a commit we know works
-    git reset --hard 256b8ae622355ab13a2815af326387ba545d8d60
-    cd ..
+  # Configure dev environment - pull down TF models
+  git clone https://github.com/tensorflow/models.git
+  cd models
+  # object detection master branch has a bug as of 9/21/2018
+  # checking out a commit we know works
+  git reset --hard 256b8ae622355ab13a2815af326387ba545d8d60
+  cd ..
 
-    PROTO_V=3.3
-    PROTO_SUFFIX=0-linux-x86_64.zip
+  PROTO_V=3.3
+  PROTO_SUFFIX=0-linux-x86_64.zip
 
 	if [ -d "protoc_${PROTO_V}" ]; then
 	    rm -rf protoc_${PROTO_V}
 	fi
-    mkdir protoc_${PROTO_V}
-    cd protoc_${PROTO_V}
 
-    echo_my "Download PROTOC..."
-    wget https://github.com/google/protobuf/releases/download/v${PROTO_V}.0/protoc-${PROTO_V}.${PROTO_SUFFIX}
-    chmod 775 protoc-${PROTO_V}.${PROTO_SUFFIX}
-    unzip protoc-${PROTO_V}.${PROTO_SUFFIX}
-    rm -rf protoc-${PROTO_V}.${PROTO_SUFFIX}
+  mkdir protoc_${PROTO_V}
+  cd protoc_${PROTO_V}
 
-    echo_my "Compiling protos..."
-    cd $TF_MODEL_DIR/models/research
-    bash object_detection/dataset_tools/create_pycocotools_package.sh /tmp/pycocotools
-    python setup.py sdist
-    (cd slim && python setup.py sdist)
+  echo_my "Download PROTOC..."
+  wget https://github.com/google/protobuf/releases/download/v${PROTO_V}.0/protoc-${PROTO_V}.${PROTO_SUFFIX}
+  chmod 775 protoc-${PROTO_V}.${PROTO_SUFFIX}
+  unzip protoc-${PROTO_V}.${PROTO_SUFFIX}
+  rm -rf protoc-${PROTO_V}.${PROTO_SUFFIX}
 
-    PROTOC=$TF_MODEL_DIR/protoc_${PROTO_V}/bin/protoc
-    $PROTOC object_detection/protos/*.proto --python_out=.
+  echo_my "Compiling protos..."
+  cd $TF_MODEL_DIR/models/research
+  bash object_detection/dataset_tools/create_pycocotools_package.sh /tmp/pycocotools
+  python setup.py sdist
+  (cd slim && python setup.py sdist)
+
+  PROTOC=$TF_MODEL_DIR/protoc_${PROTO_V}/bin/protoc
+  $PROTOC object_detection/protos/*.proto --python_out=.
 }
 
 #############################################

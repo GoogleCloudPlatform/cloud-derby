@@ -29,7 +29,7 @@ source ../setenv-ml.sh
 ### Shall we run training locally on this VM or on the Google Cloud ML Engine?
 LOCAL_TRAINING=true
 
-### What version of Google CMLE to use for remote training
+### What version of Google CMLE to use for remote training. Local training uses whatever TF you install
 CMLE_RUNTIME_VERSION=1.9
 
 ### What model to use for training. Model zoo: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
