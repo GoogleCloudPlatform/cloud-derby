@@ -45,9 +45,6 @@ EVENT_NAME="QA"
 ### Folder that holds all project sub-folders for users
 TOP_FOLDER="August-8-$EVENT_NAME"
 
-### Domain name
-DOMAIN="cloudderby.io"
-
 ### Directory for temp data
 TMP="tmp"
 

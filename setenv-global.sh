@@ -33,6 +33,9 @@ source ${PROJECT_DIR}/setenv-local.sh
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
+### Domain name
+DOMAIN="cloudderby.io"
+
 ### Camera resolution
 export HORIZONTAL_RESOLUTION_PIXELS="1024"
 export VERTICAL_RESOLUTION_PIXELS="576"
