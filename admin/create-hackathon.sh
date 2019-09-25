@@ -134,26 +134,6 @@ create_role() {
     ACTION="create"
   fi
 
-#resourcemanager.folderEditor
-#resourcemanager.folderIamAdmin
-#resourcemanager.projectIamAdmin
-#resourcemanager.folderCreator
-#dialogflow.admin
-#iam.serviceAccountAdmin
-#iam.serviceAccountKeyAdmin
-#iam.serviceAccountTokenCreator
-#iam.serviceAccountUser
-#iam.securityReviewer
-#servicemanagement.quotaAdmin
-#errorreporting.admin
-#logging.admin
-#monitoring.admin
-#cloudiot.admin
-#compute.instanceAdmin.v1
-#compute.imageUser
-#compute.networkAdmin
-#compute.securityAdmin
-#clouddebugger.user
 #ml.jobs.cancel
 #ml.jobs.create
 #ml.jobs.get
@@ -242,7 +222,28 @@ clouddebugger.breakpoints.list,\
 clouddebugger.breakpoints.listActive,\
 clouddebugger.breakpoints.update,\
 clouddebugger.debuggees.create,\
-clouddebugger.debuggees.list"
+clouddebugger.debuggees.list,\
+resourcemanager.folderEditor,\
+resourcemanager.folderIamAdmin,\
+resourcemanager.projectIamAdmin,\
+resourcemanager.folderCreator,\
+dialogflow.admin,\
+iam.serviceAccountAdmin,\
+iam.serviceAccountKeyAdmin,\
+iam.serviceAccountTokenCreator,\
+iam.serviceAccountUser,\
+iam.securityReviewer,\
+servicemanagement.quotaAdmin,\
+errorreporting.admin,\
+logging.admin,\
+monitoring.admin,\
+cloudiot.admin,\
+compute.instanceAdmin.v1,\
+compute.imageUser,\
+compute.networkAdmin,\
+compute.securityAdmin,\
+clouddebugger.user"
+
 
   gcloud iam roles ${ACTION} $DERBY_DEV_ROLE \
     --organization $(lookup_org_id) \
