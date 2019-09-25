@@ -23,7 +23,6 @@
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
-### Role of the service account, so that we can deploy resources using SA instead of human account
 TMP="tmp"
 CWD=$(pwd)
 cd ..
@@ -269,8 +268,8 @@ echo "#################################################"
 echo "     Starting the project setup process..."
 echo "#################################################"
 
-mkdir -p tmp
-INSTALL_FLAG=tmp/install.marker
+mkdir -p ${TMP}
+INSTALL_FLAG=${TMP}/install.marker
 if [ -f "$INSTALL_FLAG" ]; then
     echo "File '$INSTALL_FLAG' was found = > no need to do the install since it already has been done."
 else

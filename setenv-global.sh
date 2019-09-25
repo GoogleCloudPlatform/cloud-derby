@@ -24,7 +24,6 @@ echo "setenv-global.sh: start..."
 command -v bc >/dev/null 2>&1 || { echo >&2 "'bc' is not installed."; yes | sudo apt-get --assume-yes install bc; }
 
 ### This is the path to the home directory of the project
-#PROJECT_DIR="$HOME/cloud-derby"
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "Project directory is set to PROJECT_DIR='$PROJECT_DIR'"
 

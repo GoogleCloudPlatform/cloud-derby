@@ -134,8 +134,6 @@ create_role() {
     ACTION="create"
   fi
 
-  # TODO - add all of these roles to the CloudDerby developer role ???
-
 #resourcemanager.folderEditor
 #resourcemanager.folderIamAdmin
 #resourcemanager.projectIamAdmin
@@ -183,16 +181,7 @@ create_role() {
 #ml.versions.list
 #ml.versions.predict
 #ml.versions.update
-#clouddebugger.breakpoints.create
-#clouddebugger.breakpoints.delete
-#clouddebugger.breakpoints.get
-#clouddebugger.breakpoints.list
-#clouddebugger.breakpoints.listActive
-#clouddebugger.breakpoints.update
-#clouddebugger.debuggees.create
-#clouddebugger.debuggees.list
 
-  echo "Creating a role..."
   PERMISSIONS="\
 appengine.applications.create,\
 appengine.applications.get,\
@@ -245,7 +234,15 @@ storage.objects.get,\
 storage.objects.getIamPolicy,\
 storage.objects.list,\
 storage.objects.setIamPolicy,\
-storage.objects.update"
+storage.objects.update,\
+clouddebugger.breakpoints.create,\
+clouddebugger.breakpoints.delete,\
+clouddebugger.breakpoints.get,\
+clouddebugger.breakpoints.list,\
+clouddebugger.breakpoints.listActive,\
+clouddebugger.breakpoints.update,\
+clouddebugger.debuggees.create,\
+clouddebugger.debuggees.list"
 
   gcloud iam roles ${ACTION} $DERBY_DEV_ROLE \
     --organization $(lookup_org_id) \
