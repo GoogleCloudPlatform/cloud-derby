@@ -1,17 +1,17 @@
 {
-  "name": "cloud-derby-driving-control",
-  "description": "Node.js app for Cloud Derby game - driving decisions for the car",
-  "version": "1.0.1",
+  "name": "cloud-derby-driving-controller",
+  "description": "Driving Controller is a Node.js app that makes driving decisions for Cloud Derby",
+  "version": "1.0.2",
   "main": "app.js",
   "author": "Google Inc.",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=8"
+    "node": ">=10.0.0"
   },
   "scripts": {
     "deploy": "gcloud app deploy",
     "postinstall": "npm install @google-cloud/debug-agent",
-    "start": "node app.js",
+    "start": "node app.js"
     "test": "mocha 'tests/*_tests.js'"
   },
   "dependencies": {

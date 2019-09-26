@@ -49,7 +49,7 @@ ADMIN_PROJECT_ID="administration-203923"
 ### Name of the source bucket with images of colored balls (this is one source for all other projects)
 export GCS_SOURCE_IMAGES="cloud-derby-pictures"
 
-### Name of the destination bucket with images of colored balls and whatever other objects
+### Name of the destination bucket with images of colored balls and whatever other objects - used for ML training
 export GCS_IMAGES="${PROJECT}-images-for-training-v-${VERSION}"
 
 ### Store service account private key here
@@ -286,7 +286,7 @@ install_node()
     lsb_release -a
     echo "We are running on Linux"
     echo_my "Downloading 'node'..."
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     echo_my "Installing 'node'..."
     sudo apt-get install nodejs
   fi

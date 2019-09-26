@@ -47,7 +47,7 @@ cat << EOF > $YAML_FILE
 # Docs: https://cloud.google.com/appengine/docs/standard/nodejs/config/appref
 
 # App Engine Standard
-runtime: nodejs8
+runtime: nodejs10
 
 # App Engine Flex
 # runtime: nodejs
@@ -120,7 +120,7 @@ else
   generate_yaml
   URL=https://${APP_NAME}-dot-${PROJECT}.appspot.com/
   echo_my "Deploying into Google App Engine..."
-  yes | gcloud app deploy $YAML_FILE --project $PROJECT
+  yes | gcloud app deploy "${YAML_FILE}" --project ${PROJECT}
   # Ping the app to see if it is available
   curl -G "${URL}"
   echo_my "Running on GCP URL=$URL"

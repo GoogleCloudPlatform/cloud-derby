@@ -104,14 +104,16 @@ create_groups_and_users() {
 ###############################################################################
 create_folders() {
     echo_my "create_folders(): Creating event parent folder..."
-    gcloud alpha resource-manager folders create --display-name=$TOP_FOLDER --organization=$(lookup_org_id) | true # ignore if already exists
+    gcloud alpha resource-manager folders create --display-name=$TOP_FOLDER --organization=$(lookup_org_id) \
+            | true # ignore if already exists
 
     echo_my "Creating children folders for each car team..."
     local PARENT_FOLDER_ID=$(find_top_folder_id $TOP_FOLDER)
     
     for i in $(seq $TEAM_START_NUM $NUM_TEAMS);
     do
-        gcloud alpha resource-manager folders create --display-name=$(team_folder_name $i) --folder=$PARENT_FOLDER_ID
+        gcloud alpha resource-manager folders create --display-name=$(team_folder_name $i) --folder=$PARENT_FOLDER_ID \
+                | true # ignore if already exists
 
         local NEW_FOLDER_ID=$(find_folder_id $(team_folder_name $i) $PARENT_FOLDER_ID)
         echo_my "NEW_FOLDER_ID=$NEW_FOLDER_ID"
@@ -119,11 +121,42 @@ create_folders() {
         # See docs: https://cloud.google.com/iam/docs/understanding-roles
         gcloud alpha resource-manager folders add-iam-policy-binding $NEW_FOLDER_ID \
 		          --member=group:$(team_name $i)@$DOMAIN --role="organizations/$(lookup_org_id)/roles/$DERBY_DEV_ROLE"
+
+        local COMMAND="gcloud alpha resource-manager folders add-iam-policy-binding $NEW_FOLDER_ID --member=group:$(team_name $i)@$DOMAIN --role=roles/"
+
+        eval ${COMMAND}resourcemanager.projectCreator
+        eval ${COMMAND}resourcemanager.folderEditor
+        eval ${COMMAND}resourcemanager.folderIamAdmin
+        eval ${COMMAND}resourcemanager.projectIamAdmin
+        eval ${COMMAND}resourcemanager.folderCreator
+        eval ${COMMAND}resourcemanager.projectDeleter
+        eval ${COMMAND}appengine.appAdmin
+        eval ${COMMAND}dialogflow.admin
+        eval ${COMMAND}ml.admin
+        eval ${COMMAND}pubsub.admin
+        eval ${COMMAND}storage.admin
+        eval ${COMMAND}iam.serviceAccountAdmin
+        eval ${COMMAND}iam.serviceAccountKeyAdmin
+        eval ${COMMAND}iam.serviceAccountTokenCreator
+        eval ${COMMAND}iam.serviceAccountUser
+        eval ${COMMAND}iam.securityReviewer
+        eval ${COMMAND}servicemanagement.quotaAdmin
+        eval ${COMMAND}errorreporting.admin
+        eval ${COMMAND}logging.admin
+        eval ${COMMAND}monitoring.admin
+        eval ${COMMAND}cloudiot.admin
+        eval ${COMMAND}compute.instanceAdmin.v1
+        eval ${COMMAND}compute.imageUser
+        eval ${COMMAND}compute.networkAdmin
+        eval ${COMMAND}compute.securityAdmin
+        eval ${COMMAND}source.admin
+        eval ${COMMAND}clouddebugger.user
+        eval ${COMMAND}editor
     done
 }
 
 #############################################
-# Create Special Cloud Derby Role
+# Create Special Cloud Derby Role - this is only used for the service account permissions
 #############################################
 create_role() {
   if gcloud iam roles list --organization $(lookup_org_id) | grep -q $DERBY_DEV_ROLE; then
@@ -134,50 +167,7 @@ create_role() {
     ACTION="create"
   fi
 
-#ml.jobs.cancel
-#ml.jobs.create
-#ml.jobs.get
-#ml.jobs.getIamPolicy
-#ml.jobs.list
-#ml.jobs.setIamPolicy
-#ml.jobs.update
-#ml.locations.get
-#ml.locations.list
-#ml.models.create
-#ml.models.delete
-#ml.models.get
-#ml.models.getIamPolicy
-#ml.models.list
-#ml.models.predict
-#ml.models.setIamPolicy
-#ml.models.update
-#ml.operations.cancel
-#ml.operations.get
-#ml.operations.list
-#ml.projects.getConfig
-#ml.versions.create
-#ml.versions.delete
-#ml.versions.get
-#ml.versions.list
-#ml.versions.predict
-#ml.versions.update
-
   PERMISSIONS="\
-appengine.applications.create,\
-appengine.applications.get,\
-appengine.applications.update,\
-appengine.instances.delete,\
-appengine.instances.get,\
-appengine.instances.list,\
-appengine.services.delete,\
-appengine.services.get,\
-appengine.services.list,\
-appengine.services.update,\
-appengine.versions.create,\
-appengine.versions.delete,\
-appengine.versions.get,\
-appengine.versions.list,\
-appengine.versions.update,\
 compute.projects.get,\
 compute.projects.setCommonInstanceMetadata,\
 pubsub.subscriptions.consume,\
@@ -193,14 +183,10 @@ pubsub.topics.get,\
 pubsub.topics.list,\
 pubsub.topics.publish,\
 pubsub.topics.update,\
-resourcemanager.projects.get,\
-resourcemanager.projects.create,\
-resourcemanager.projects.getIamPolicy,\
-resourcemanager.projects.setIamPolicy,\
-resourcemanager.projects.undelete,\
-resourcemanager.projects.update,\
-resourcemanager.projects.updateLiens,\
 resourcemanager.organizations.get,\
+resourcemanager.projects.get,\
+resourcemanager.projects.getIamPolicy,\
+resourcemanager.projects.list,\
 storage.buckets.create,\
 storage.buckets.delete,\
 storage.buckets.get,\
@@ -223,27 +209,56 @@ clouddebugger.breakpoints.listActive,\
 clouddebugger.breakpoints.update,\
 clouddebugger.debuggees.create,\
 clouddebugger.debuggees.list,\
-resourcemanager.folderEditor,\
-resourcemanager.folderIamAdmin,\
-resourcemanager.projectIamAdmin,\
-resourcemanager.folderCreator,\
-dialogflow.admin,\
-iam.serviceAccountAdmin,\
-iam.serviceAccountKeyAdmin,\
-iam.serviceAccountTokenCreator,\
-iam.serviceAccountUser,\
-iam.securityReviewer,\
-servicemanagement.quotaAdmin,\
-errorreporting.admin,\
-logging.admin,\
-monitoring.admin,\
-cloudiot.admin,\
-compute.instanceAdmin.v1,\
-compute.imageUser,\
-compute.networkAdmin,\
-compute.securityAdmin,\
-clouddebugger.user"
+cloudiot.devices.bindGateway,\
+cloudiot.devices.create,\
+cloudiot.devices.delete,\
+cloudiot.devices.get,\
+cloudiot.devices.list,\
+cloudiot.devices.sendCommand,\
+cloudiot.devices.unbindGateway,\
+cloudiot.devices.update,\
+cloudiot.devices.updateConfig,\
+cloudiot.registries.create,\
+cloudiot.registries.delete,\
+cloudiot.registries.get,\
+cloudiot.registries.getIamPolicy,\
+cloudiot.registries.list,\
+cloudiot.registries.setIamPolicy,\
+cloudiot.registries.update"
 
+#resourcemanager.projects.update,\
+#resourcemanager.projects.updateLiens,\
+#appengine.applications.create,\
+#appengine.applications.get,\
+#appengine.applications.update,\
+#appengine.instances.delete,\
+#appengine.instances.get,\
+#appengine.instances.list,\
+#appengine.services.delete,\
+#appengine.services.get,\
+#appengine.services.list,\
+#appengine.services.update,\
+#appengine.versions.create,\
+#appengine.versions.delete,\
+#appengine.versions.get,\
+#appengine.versions.list,\
+#appengine.versions.update,\
+#iam.serviceAccountKeys.create,\
+#iam.serviceAccountKeys.delete,\
+#iam.serviceAccountKeys.get,\
+#iam.serviceAccountKeys.list,\
+#iam.serviceAccounts.actAs,\
+#iam.serviceAccounts.create,\
+#iam.serviceAccounts.delete,\
+#iam.serviceAccounts.get,\
+#iam.serviceAccounts.getAccessToken,\
+#iam.serviceAccounts.getIamPolicy,\
+#iam.serviceAccounts.implicitDelegation,\
+#iam.serviceAccounts.list,\
+#iam.serviceAccounts.setIamPolicy,\
+#iam.serviceAccounts.signBlob,\
+#iam.serviceAccounts.signJwt,\
+#iam.serviceAccounts.update
 
   gcloud iam roles ${ACTION} $DERBY_DEV_ROLE \
     --organization $(lookup_org_id) \
@@ -260,13 +275,13 @@ clouddebugger.user"
 ###############################################################################
 print_header "Creating workshop users, folders, etc..."
 
-setup
+#setup
 
-create_read_only_group
+#create_read_only_group
 
 create_role
 
-create_groups_and_users
+#create_groups_and_users
 
 create_folders
 
