@@ -32,8 +32,8 @@ mkdir -p ${TMP}
 ### Defines the name of the App Engine Flex App and forms part of URL
 APP_NAME=driving-controller
 
-### Configuration of the deployment for 
-YAML_FILE=${TMP}/app-generated.yml
+### Configuration of the deployment for App Engine
+YAML_FILE=$(pwd)/js/app-generated.yml
 
 ###############################################
 # This generates proper YAML connfig for the app
@@ -119,7 +119,7 @@ then
 else
   generate_yaml
   URL=https://${APP_NAME}-dot-${PROJECT}.appspot.com/
-  echo_my "Deploying into Google App Engine..."
+  echo_my "Deploying into Google App Engine using YAML file '${YAML_FILE}'. Current directory is '$(pwd)'..."
   yes | gcloud app deploy "${YAML_FILE}" --project ${PROJECT}
   # Ping the app to see if it is available
   curl -G "${URL}"
