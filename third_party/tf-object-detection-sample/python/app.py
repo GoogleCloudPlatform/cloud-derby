@@ -301,8 +301,9 @@ def object_inference():
       print response_from_ml
       return jsonify(response_from_ml)
     else:
-      print("GCS access error - file '%s' not found." % gcs_uri)
-      error_msg = {"Error" : "GCS file {gcs_uri} not found or access is denied.".format(gcs_uri) }
+      print("GCS access error - file '%s' not found or access is denied." % gcs_uri)
+      error_msg = {"Error" : "GCS file {file} not found or access is denied.".format(file=gcs_uri) }
+      print error_msg
       return jsonify(error_msg), 404
       
 
