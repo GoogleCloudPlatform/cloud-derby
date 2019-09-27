@@ -295,12 +295,14 @@ def object_inference():
     gcs_uri = unquote(request.args.get('gcs_uri'))
     file_name = get_image_from_GCS(gcs_uri)
     if file_name != None:
+      print("Starting inference...")
       start_time = time.time()
       response_from_ml = detect_object_bounding_boxes(file_name)
       print("--- rest() inference took %s seconds" % (time.time() - start_time))
       print response_from_ml
       return jsonify(response_from_ml)
     else:
+      print("GCS access error - file not found.")
       error_msg = {"Error" : "gcs file {file_name} not found".format(file_name=request.args.get('gcs_uri')) }
       return jsonify(error_msg), 404
       
