@@ -30,7 +30,7 @@ source ./setenv.sh
 TMP="tmp"
 
 ### Service account key for backup
-BACKUP_SERVICE_ACCOUNT_SECRET="$HOME/.secrets/backup-service-account-secret.json"
+BACKUP_SERVICE_ACCOUNT_SECRET="${PROJECT_DIR}/.secrets/backup-service-account-secret.json"
 
 ###############################################################################
 # Prepare backup destinations

@@ -18,7 +18,6 @@
 
 ##################################################################################
 # Environment settings that are to be kept secret and not exposed to the GitHub repo
-# This file needs to be put into the user $HOME directory.
 ##################################################################################
 
 set -u # This prevents running the script if any of the variables have not been set
@@ -31,9 +30,6 @@ source ../setenv-global.sh
 ### Billing accound ID used to pay for project resources
 BILLING_ACCOUNT_ID="<set your Billing ID here>"
 
-### This is the project that hosts reference images and other admin elements
-ADMIN_PROJECT_ID="administration-203923"
-
 ### How many teams will participate in the workshop
 NUM_TEAMS=1
 
@@ -44,13 +40,10 @@ TEAM_START_NUM=1
 NUM_PEOPLE_PER_TEAM=1
 
 ### Name of the event - to be added to user and group names
-EVENT_NAME="DC3"
+EVENT_NAME="QA"
 
 ### Folder that holds all project sub-folders for users
-TOP_FOLDER="June-12-$EVENT_NAME"
-
-### Domain name
-DOMAIN="cloudderby.io"
+TOP_FOLDER="August-8-$EVENT_NAME"
 
 ### Directory for temp data
 TMP="tmp"
@@ -62,25 +55,12 @@ ADMIN_READ_GROUP="read-only-group@$DOMAIN"
 GAM="/home/${USER}/bin/gam/gam"
 
 ###############################################################################
-# Lookup Org ID from the Domain name
-# Input:
-#   1 - Domain name
-###############################################################################
-lookup_org_id() {
-    if [ -z ${ORGANIZATION_ID+x} ] ; then
-        ORGANIZATION_ID=$(gcloud organizations list | grep ${DOMAIN} | awk '{print $2}')
-    fi
-
-    echo "$ORGANIZATION_ID"
-}
-
-###############################################################################
 # Generate team name
 # Input:
 #   1 - team number
 ###############################################################################
 team_name() {
-    echo "team${1}${EVENT_NAME}"
+  echo "team${1}${EVENT_NAME}"
 }
 
 ###############################################################################
@@ -90,7 +70,7 @@ team_name() {
 #   2 - team number
 ###############################################################################
 user_name() {
-    echo "user${1}team${2}${EVENT_NAME}"
+  echo "user${1}team${2}${EVENT_NAME}"
 }
 
 ###############################################################################
@@ -99,34 +79,34 @@ user_name() {
 #   1 - team #
 ###############################################################################
 team_folder_name() {
-    echo "Team-${1}-resources"
+  echo "Team-${1}-resources"
 }
 
 ###############################################################################
 # Generate random password
 ###############################################################################
 generate_password() {
-    local PASSWORD_LENGTH=10
-    echo $(gpw 1 $PASSWORD_LENGTH)
+  local PASSWORD_LENGTH=10
+  echo $(gpw 1 $PASSWORD_LENGTH)
 }
 
 ###############################################################################
 # Check prereqs and do install
 ###############################################################################
 setup() {
-    mkdir -p $TMP
-    INSTALL_FLAG=$TMP/install.marker
+  mkdir -p $TMP
+  INSTALL_FLAG=$TMP/install.marker
 
-    if [ -f "$INSTALL_FLAG" ]; then
-      echo_my "Marker file '$INSTALL_FLAG' was found = > no need to do the install."
-    else
-      echo_my "Marker file '$INSTALL_FLAG' was NOT found = > starting one time install."
-      # Password generator
-      sudo apt-get install gpw
-      # GAM is an awesome GSuite management OSS tool: https://github.com/jay0lee/GAM/wiki
-      bash <(curl -s -S -L https://git.io/install-gam)
-      touch $INSTALL_FLAG
-    fi
+  if [ -f "$INSTALL_FLAG" ]; then
+    echo_my "Marker file '$INSTALL_FLAG' was found = > no need to do the install."
+  else
+    echo_my "Marker file '$INSTALL_FLAG' was NOT found = > starting one time install."
+    # Password generator
+    sudo apt-get install gpw
+    # GAM is an awesome GSuite management OSS tool: https://github.com/jay0lee/GAM/wiki
+    bash <(curl -s -S -L https://git.io/install-gam)
+    touch $INSTALL_FLAG
+  fi
 }
 
 ###############################################################################
@@ -135,7 +115,7 @@ setup() {
 #   1 - folder display name
 ###############################################################################
 find_top_folder_id() {
-    echo $(gcloud alpha resource-manager folders list --organization=$(lookup_org_id) \
+  echo $(gcloud alpha resource-manager folders list --organization=$(lookup_org_id) \
         --filter=" displayName=$1" | grep $1 | sed -n -e "s/.* //p")
 }
 
@@ -146,7 +126,7 @@ find_top_folder_id() {
 #   2 - parent folder ID
 ###############################################################################
 find_folder_id() {
-    echo $(gcloud alpha resource-manager folders list --folder=$2 \
+  echo $(gcloud alpha resource-manager folders list --folder=$2 \
         --filter=" displayName=$1" | grep $1 | sed -n -e "s/.* //p")
 }
 

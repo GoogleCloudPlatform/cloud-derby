@@ -188,7 +188,7 @@ setup_object_detection() {
 
   echo_my "Convert training data to TFRecords..."
   cd $CWD
-  python $TL_MODULE_PATH/python/create_cloud_derby_tf_record.py \
+  python ${MODEL_CONFIG_PATH}/python/create_cloud_derby_tf_record.py \
       --label_map_path=$LABEL_MAP_FILE \
       --data_dir=$CWD \
       --output_dir=$CWD
@@ -245,7 +245,6 @@ EOF
 
 #############################################
 # Generate Model Config file for
-# faster_rcnn_resnet101_coco_11_06_2017
 # Consider this material: http://www.frank-dieterle.de/phd/2_8_1.html
 #############################################
 generate_model_config_faster_rcnn_resnet101() {
@@ -466,6 +465,53 @@ train_model() {
   fi
 }
 
+##################################################
+# Configuring TF research models
+# Based on this tutorial: https://cloud.google.com/solutions/creating-object-detection-application-tensorflow
+##################################################
+setup_models() {
+    echo_my "Setting up Proto and TensorFlow Models..."
+
+	if [ -d "$TF_MODEL_DIR" ]; then
+	    rm -rf $TF_MODEL_DIR
+	fi
+	mkdir -p $TF_MODEL_DIR
+	cd $TF_MODEL_DIR
+
+  # Configure dev environment - pull down TF models
+  git clone https://github.com/tensorflow/models.git
+  cd models
+  # object detection master branch has a bug as of 9/21/2018
+  # checking out a commit we know works
+  git reset --hard 256b8ae622355ab13a2815af326387ba545d8d60
+  cd ..
+
+  PROTO_V=3.3
+  PROTO_SUFFIX=0-linux-x86_64.zip
+
+	if [ -d "protoc_${PROTO_V}" ]; then
+	    rm -rf protoc_${PROTO_V}
+	fi
+
+  mkdir protoc_${PROTO_V}
+  cd protoc_${PROTO_V}
+
+  echo_my "Download PROTOC..."
+  wget https://github.com/google/protobuf/releases/download/v${PROTO_V}.0/protoc-${PROTO_V}.${PROTO_SUFFIX}
+  chmod 775 protoc-${PROTO_V}.${PROTO_SUFFIX}
+  unzip protoc-${PROTO_V}.${PROTO_SUFFIX}
+  rm -rf protoc-${PROTO_V}.${PROTO_SUFFIX}
+
+  echo_my "Compiling protos..."
+  cd $TF_MODEL_DIR/models/research
+  bash object_detection/dataset_tools/create_pycocotools_package.sh /tmp/pycocotools
+  python setup.py sdist
+  (cd slim && python setup.py sdist)
+
+  PROTOC=$TF_MODEL_DIR/protoc_${PROTO_V}/bin/protoc
+  $PROTOC object_detection/protos/*.proto --python_out=.
+}
+
 #############################################
 # MAIN
 #############################################
@@ -474,10 +520,18 @@ print_header "TensorFlow transferred learning training"
 CWD=$(pwd)
 TMP=$CWD/tmp
 mkdir -p $TMP
+INSTALL_FLAG=${TMP}/install.marker
 
-if [ -f "$SERVICE_ACCOUNT_SECRET" ]; then
-  echo_my "Activating service account..."
-  gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
+if [ -f "$INSTALL_FLAG" ]; then
+  echo_my "Marker file '$INSTALL_FLAG' was found = > no need to do the install."
+else
+  echo_my "Marker file '$INSTALL_FLAG' was NOT found = > starting one time install."
+  # This is to allow NVIDIA packages to be verified
+  curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+  yes | sudo apt-get update
+  yes | sudo apt-get install apt-transport-https unzip zip
+  setup_models
+  touch $INSTALL_FLAG
 fi
 
 generate_model_config_faster_rcnn_resnet101 $MODEL_CONFIG_PATH/$MODEL_CONFIG

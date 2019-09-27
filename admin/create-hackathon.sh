@@ -1,5 +1,9 @@
 #!/bin/bash
 
+###############################################################################
+# This script creates new hackathon event with users and folders generated
+###############################################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -16,10 +20,6 @@
 # limitations under the License.
 #
 
-###############################################################################
-# This script creates new hackathon event with users and folders generated
-###############################################################################
-
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
@@ -32,16 +32,19 @@ USER_LIST="$TMP/users.csv"
 # Create special Read Only group 
 ###############################################################################
 create_read_only_group() {
-    # Create read only group
+    echo_my "Create read only group '$ADMIN_READ_GROUP'..."
     $GAM create group "$ADMIN_READ_GROUP" name "Resource Read-Only group" description "Read only access to common resources" | true # ignore if error
-    # Permissions for things outside the team folder
+    echo_my "Permissions for project '$ADMIN_PROJECT_ID'..."
     COMMAND="gcloud projects add-iam-policy-binding $ADMIN_PROJECT_ID --member=group:$ADMIN_READ_GROUP --role=roles/"
-    # All users need to be able to read the source repo
-    eval ${COMMAND}source.reader
-    # All users need to be able to read pre-annotated images
+
+    echo_my "All users need to be able to read pre-annotated images..."
     eval ${COMMAND}storage.objectViewer
-    # All users need to be able to use Windows VM image we provide for annotations with some software pre-installed on it
+
+    echo_my "All users need to be able to use Windows VM image we provide for annotations with some software pre-installed on it..."
     eval ${COMMAND}compute.imageUser
+
+    echo_my "All users need to be able to lookup IP address of the DEMO Inference VM from project '$DEMO_PROJECT'..."
+    gcloud projects add-iam-policy-binding $DEMO_PROJECT --member=group:$ADMIN_READ_GROUP --role="roles/compute.networkUser"
 }
 
 ###############################################################################
@@ -55,7 +58,8 @@ add_user() {
     local TEAM_NUM=$2
     local PASSWORD=$(generate_password)
 
-    $GAM create user $(user_name $USER_NUM $TEAM_NUM) firstname "User$USER_NUM" lastname "Member of Team $TEAM_NUM" password $PASSWORD
+    $GAM create user $(user_name $USER_NUM $TEAM_NUM) firstname "User$USER_NUM" lastname "Member of Team $TEAM_NUM" \
+        password $PASSWORD
 
     echo "$(user_name $USER_NUM $TEAM_NUM)@$DOMAIN,$PASSWORD" >> ${USER_LIST}
 }
@@ -69,17 +73,17 @@ create_team() {
     local TEAM_NUM=$1
     echo_my "create_team(): Creating team #$TEAM_NUM..."
 
-    $GAM create group "$(team_name $TEAM_NUM)" name "Car team $TEAM_NUM" description "Developers working on the car # $TEAM_NUM" | true # ignore if error
+    $GAM create group "$(team_name $TEAM_NUM)" name "Car team $TEAM_NUM" description \
+        "Developers working on the car # $TEAM_NUM" | true # ignore if error
     
     for j in $(seq 1 $NUM_PEOPLE_PER_TEAM);
     do
         add_user $j $TEAM_NUM
-        # Add user to his team group
+        echo_my "Adding user to his team group..."
         $GAM update group "$(team_name $TEAM_NUM)" add member $(user_name $j $TEAM_NUM)@$DOMAIN
-        # Add user to the read-only group for shared resources
+        echo_my "Adding user to the read-only group for shared resources..."
         $GAM update group "$ADMIN_READ_GROUP" add member $(user_name $j $TEAM_NUM)@$DOMAIN
     done
-
 }
 
 ###############################################################################
@@ -87,8 +91,6 @@ create_team() {
 ###############################################################################
 create_groups_and_users() {
     echo_my "create_groups_and_users(): started..."
-
-    # Create empty file and overwrite the existing one
     echo "Email,Password" > $USER_LIST
 
     for i in $(seq $TEAM_START_NUM $NUM_TEAMS);
@@ -101,22 +103,25 @@ create_groups_and_users() {
 # Create folders and projects in GCP
 ###############################################################################
 create_folders() {
-    echo_my "create_folders(): started..."
-
-    echo_my "Creating event parent folder..."
-    gcloud alpha resource-manager folders create --display-name=$TOP_FOLDER --organization=$(lookup_org_id) | true # ignore if already exists
+    echo_my "create_folders(): Creating event parent folder..."
+    gcloud alpha resource-manager folders create --display-name=$TOP_FOLDER --organization=$(lookup_org_id) \
+            | true # ignore if already exists
 
     echo_my "Creating children folders for each car team..."
     local PARENT_FOLDER_ID=$(find_top_folder_id $TOP_FOLDER)
     
     for i in $(seq $TEAM_START_NUM $NUM_TEAMS);
     do
-        gcloud alpha resource-manager folders create --display-name=$(team_folder_name $i) --folder=$PARENT_FOLDER_ID
+        gcloud alpha resource-manager folders create --display-name=$(team_folder_name $i) --folder=$PARENT_FOLDER_ID \
+                | true # ignore if already exists
 
         local NEW_FOLDER_ID=$(find_folder_id $(team_folder_name $i) $PARENT_FOLDER_ID)
-        echo "NEW_FOLDER_ID=$NEW_FOLDER_ID"
+        echo_my "NEW_FOLDER_ID=$NEW_FOLDER_ID"
 
         # See docs: https://cloud.google.com/iam/docs/understanding-roles
+        gcloud alpha resource-manager folders add-iam-policy-binding $NEW_FOLDER_ID \
+		          --member=group:$(team_name $i)@$DOMAIN --role="organizations/$(lookup_org_id)/roles/$DERBY_DEV_ROLE"
+
         local COMMAND="gcloud alpha resource-manager folders add-iam-policy-binding $NEW_FOLDER_ID --member=group:$(team_name $i)@$DOMAIN --role=roles/"
 
         eval ${COMMAND}resourcemanager.projectCreator
@@ -147,28 +152,122 @@ create_folders() {
         eval ${COMMAND}source.admin
         eval ${COMMAND}clouddebugger.user
         eval ${COMMAND}editor
-
     done
 }
 
-###############################################################################
-# Update folder permissions
-###############################################################################
-update_permissions() {
-    echo_my "update_permissions(): started..."
+#############################################
+# Create Special Cloud Derby Role - this is only used for the service account permissions
+#############################################
+create_role() {
+  if gcloud iam roles list --organization $(lookup_org_id) | grep -q $DERBY_DEV_ROLE; then
+    echo_my "Role '$DERBY_DEV_ROLE' already exists - updating it..."
+    ACTION="update"
+  else
+    echo "Creating a role '$DERBY_DEV_ROLE'..."
+    ACTION="create"
+  fi
 
-    local PARENT_FOLDER_ID=$(find_top_folder_id $TOP_FOLDER)
-    
-    for i in $(seq $TEAM_START_NUM $NUM_TEAMS);
-    do
-        local NEW_FOLDER_ID=$(find_folder_id $(team_folder_name $i) $PARENT_FOLDER_ID)
+  PERMISSIONS="\
+compute.projects.get,\
+compute.projects.setCommonInstanceMetadata,\
+pubsub.subscriptions.consume,\
+pubsub.subscriptions.create,\
+pubsub.subscriptions.delete,\
+pubsub.subscriptions.get,\
+pubsub.subscriptions.list,\
+pubsub.subscriptions.update,\
+pubsub.topics.attachSubscription,\
+pubsub.topics.create,\
+pubsub.topics.delete,\
+pubsub.topics.get,\
+pubsub.topics.list,\
+pubsub.topics.publish,\
+pubsub.topics.update,\
+resourcemanager.organizations.get,\
+resourcemanager.projects.get,\
+resourcemanager.projects.getIamPolicy,\
+resourcemanager.projects.list,\
+storage.buckets.create,\
+storage.buckets.delete,\
+storage.buckets.get,\
+storage.buckets.getIamPolicy,\
+storage.buckets.list,\
+storage.buckets.setIamPolicy,\
+storage.buckets.update,\
+storage.objects.create,\
+storage.objects.delete,\
+storage.objects.get,\
+storage.objects.getIamPolicy,\
+storage.objects.list,\
+storage.objects.setIamPolicy,\
+storage.objects.update,\
+clouddebugger.breakpoints.create,\
+clouddebugger.breakpoints.delete,\
+clouddebugger.breakpoints.get,\
+clouddebugger.breakpoints.list,\
+clouddebugger.breakpoints.listActive,\
+clouddebugger.breakpoints.update,\
+clouddebugger.debuggees.create,\
+clouddebugger.debuggees.list,\
+cloudiot.devices.bindGateway,\
+cloudiot.devices.create,\
+cloudiot.devices.delete,\
+cloudiot.devices.get,\
+cloudiot.devices.list,\
+cloudiot.devices.sendCommand,\
+cloudiot.devices.unbindGateway,\
+cloudiot.devices.update,\
+cloudiot.devices.updateConfig,\
+cloudiot.registries.create,\
+cloudiot.registries.delete,\
+cloudiot.registries.get,\
+cloudiot.registries.getIamPolicy,\
+cloudiot.registries.list,\
+cloudiot.registries.setIamPolicy,\
+cloudiot.registries.update"
 
-        # See docs: https://cloud.google.com/iam/docs/understanding-roles
-        local COMMAND="gcloud alpha resource-manager folders add-iam-policy-binding $NEW_FOLDER_ID --member=group:$(team_name $i)@$DOMAIN --role=roles/"
+#resourcemanager.projects.update,\
+#resourcemanager.projects.updateLiens,\
+#appengine.applications.create,\
+#appengine.applications.get,\
+#appengine.applications.update,\
+#appengine.instances.delete,\
+#appengine.instances.get,\
+#appengine.instances.list,\
+#appengine.services.delete,\
+#appengine.services.get,\
+#appengine.services.list,\
+#appengine.services.update,\
+#appengine.versions.create,\
+#appengine.versions.delete,\
+#appengine.versions.get,\
+#appengine.versions.list,\
+#appengine.versions.update,\
+#iam.serviceAccountKeys.create,\
+#iam.serviceAccountKeys.delete,\
+#iam.serviceAccountKeys.get,\
+#iam.serviceAccountKeys.list,\
+#iam.serviceAccounts.actAs,\
+#iam.serviceAccounts.create,\
+#iam.serviceAccounts.delete,\
+#iam.serviceAccounts.get,\
+#iam.serviceAccounts.getAccessToken,\
+#iam.serviceAccounts.getIamPolicy,\
+#iam.serviceAccounts.implicitDelegation,\
+#iam.serviceAccounts.list,\
+#iam.serviceAccounts.setIamPolicy,\
+#iam.serviceAccounts.signBlob,\
+#iam.serviceAccounts.signJwt,\
+#iam.serviceAccounts.update
 
-        eval ${COMMAND}editor
+  gcloud iam roles ${ACTION} $DERBY_DEV_ROLE \
+    --organization $(lookup_org_id) \
+    --title "Cloud Derby Developer Role" \
+    --description "Access to resources needed to develop and deploy Cloud Derby" \
+    --stage "GA" \
+    --permissions $PERMISSIONS
 
-    done
+  sleep 3
 }
 
 ###############################################################################
@@ -176,15 +275,14 @@ update_permissions() {
 ###############################################################################
 print_header "Creating workshop users, folders, etc..."
 
-setup
+#setup
 
-create_read_only_group
+#create_read_only_group
 
-create_groups_and_users
+create_role
+
+#create_groups_and_users
 
 create_folders
-
-# This is debugging step if any additional permissions need to be granted
-#update_permissions
 
 print_footer "SUCCESS: New workshop configuration created."

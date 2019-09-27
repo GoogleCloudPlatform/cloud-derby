@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#################################################################################
+# Create car to cloud communication resources - this is to be used by Dialogflow
+#################################################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -16,18 +20,9 @@
 # limitations under the License.
 #
 
-#############################################################################
-# Create car to cloud communication resources
-#############################################################################
-
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
 source ./setenv-global.sh
-
-# The service account is needed to get permissions to create resources
-gcloud auth activate-service-account --key-file=$SERVICE_ACCOUNT_SECRET
-
-#gcloud auth login
 
 create_resources

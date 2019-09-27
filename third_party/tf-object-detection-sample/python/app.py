@@ -289,19 +289,20 @@ def post():
 
 @app.route(INFERENCE_URL,methods=['GET'])
 def object_inference():
-    print("")
-    print("-------------------------- object_inference():")
-    print request.args.get('gcs_uri')
     gcs_uri = unquote(request.args.get('gcs_uri'))
+    print("")
+    print("-------------------------- object_inference() on file '%s'" % gcs_uri)
     file_name = get_image_from_GCS(gcs_uri)
     if file_name != None:
+      print("Starting inference on file '%s'..." % file_name)
       start_time = time.time()
       response_from_ml = detect_object_bounding_boxes(file_name)
       print("--- rest() inference took %s seconds" % (time.time() - start_time))
       print response_from_ml
       return jsonify(response_from_ml)
     else:
-      error_msg = {"Error" : "gcs file {file_name} not found".format(file_name=request.args.get('gcs_uri')) }
+      error_msg = {"Error" : "GCS file {file} not found or access is denied.".format(file=gcs_uri) }
+      print error_msg
       return jsonify(error_msg), 404
       
 

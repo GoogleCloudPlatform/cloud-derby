@@ -20,8 +20,6 @@
 # Environment settings that are unique to a development machine - these
 # do not get committed into repo and allow multi-user development. Example of this
 # can be found in "src/setup" folder.
-# 
-# This file needs to be put into the user $HOME directory.
 ##################################################################################
 
 set -u # This prevents running the script if any of the variables have not been set
@@ -30,8 +28,7 @@ set -e # Exit if error is detected during pipeline execution
 echo "setenv-local.sh: start..."
 
 ### Automatically generate unique project ID for the first run and save it into a file. Later read it from file
-BASE_PATH="$HOME"
-PROJECT_NAME_FILE="$BASE_PATH/project-id.sh"
+PROJECT_NAME_FILE="$PROJECT_DIR/project-id.sh"
 
 if [ -f "$PROJECT_NAME_FILE" ] ; then
     echo "Sourcing existing project file '$PROJECT_NAME_FILE'..."

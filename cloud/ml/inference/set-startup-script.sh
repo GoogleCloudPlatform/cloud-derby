@@ -1,5 +1,9 @@
 #!/bin/bash
 
+###########################################################
+# Configure inference VM to start python inference app n restart
+###########################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -17,10 +21,6 @@
 #
 
 source ./setenv.sh
-
-###########################################################
-# Configure inference VM to start python inference app n restart
-###########################################################
 
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution

@@ -38,14 +38,8 @@ echo_my "Using topic $SENSOR_TOPIC to simulate publish of data from the sensor..
 ###############################################
 setup_once()
 {
-    echo_my "Downloading 'node.js'..."
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-    echo_my "Installing 'node.js'..."
-    sudo apt-get install nodejs
-    node -v
-    npm -v
-    echo_my "Installing npm modules..."
-    npm install
+    echo_my "one time installation..."
+    install_node
 }
 
 ###############################################

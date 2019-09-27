@@ -1,5 +1,9 @@
 #!/bin/bash
 
+###############################################################
+# Shared environment variables for Transferred Learning module
+###############################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -16,10 +20,6 @@
 # limitations under the License.
 #
 
-###########################################################
-# Shared environment variables for Transferred Learning module
-###########################################################
-
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
 
@@ -29,7 +29,7 @@ source ../setenv-ml.sh
 ### Shall we run training locally on this VM or on the Google Cloud ML Engine?
 LOCAL_TRAINING=true
 
-### What version of Google CMLE to use for remote training
+### What version of Google CMLE to use for remote training. Local training uses whatever TF you install
 CMLE_RUNTIME_VERSION=1.9
 
 ### What model to use for training. Model zoo: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
@@ -39,8 +39,6 @@ MODEL=faster_rcnn_resnet101_coco_2018_01_28
 MODEL_CONFIG=${MODEL}-cloud-derby.config
 
 ### Which dataset to use
-TL_MODULE_PATH=$(pwd)
-MODEL_CONFIG_PATH=$TL_MODULE_PATH
+MODEL_CONFIG_PATH=$(pwd)
 
-### TensorBoard HTTP PORT
 export TF_HTTP_PORT=8081

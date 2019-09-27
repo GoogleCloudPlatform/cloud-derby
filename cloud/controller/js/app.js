@@ -18,11 +18,11 @@ const VERSION = 1.01;
 const APP = 'DRIVING-CONTROL-APP';
 const express = require('express');
 const cors = require('cors');
+const PubSub = require('@google-cloud/pubsub');
 
 console.log(`***${APP} is starting up***`);
 
 let process = require('process'); // Required for mocking environment variables
-let PubSub = require('@google-cloud/pubsub');
 let bodyParser = require('body-parser');
 let path = require('path');
 let Navigation = require('./navigation');
@@ -48,6 +48,7 @@ const DRIVING_MODES = require('./validate').DRIVING_MODES;
 // the project specified by the GCLOUD_PROJECT environment variable. See
 // https://googlecloudplatform.github.io/gcloud-node/#/docs/google-cloud/latest/guides/authentication
 // These environment variables are set automatically on Google App Engine
+
 // Instantiate a pubsub client
 const pubsub = PubSub();
 // References an existing subscription

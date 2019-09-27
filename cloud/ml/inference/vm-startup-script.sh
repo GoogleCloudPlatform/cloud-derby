@@ -1,5 +1,10 @@
 #!/bin/bash
 
+###########################################################
+# Script to be run when Inference VM restarts
+# This will start REST inference endpoint and web app
+###########################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -16,10 +21,8 @@
 # limitations under the License.
 #
 
-###########################################################
-# Script to be run when Inference VM restarts
-###########################################################
-ACCOUNT="<put_your_user_id_here>" # For example "user1team1pa"
+ACCOUNT="${USER}"
+#ACCOUNT="<put_your_OS_user_id_here>" # For example "user1team1pa"
 cd /home/${ACCOUNT}/cloud-derby/src/cloud/ml/inference
 echo "$(date) - starting inference app..." >> tmp/boot.log
-sudo -u $ACCOUNT ./run.sh
+sudo -u ${ACCOUNT} ./run.sh

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#############################################################################
+# Shared environment variables for Machine Learning Module
+#############################################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -15,10 +19,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-#############################################################################
-# Shared environment variables for Machine Learning Module
-#############################################################################
 
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
@@ -53,7 +53,7 @@ first_stage_max_proposals=300
 
 ### TF settings
 export TF_PATH=~/tensorflow
-export TF_MODEL_DIR=$BASE_PATH/tensorflow-models
+export TF_MODEL_DIR=$PROJECT_DIR/tensorflow-models
 export MODEL_BASE=$TF_MODEL_DIR/models/research
 export TMP=$(pwd)/tmp
 

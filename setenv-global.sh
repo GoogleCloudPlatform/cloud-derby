@@ -3,6 +3,7 @@
 #############################################################################
 # Shared environment variables and utility functions for entire project
 #############################################################################
+
 #
 # Copyright 2018 Google LLC
 #
@@ -22,10 +23,17 @@ echo "setenv-global.sh: start..."
 
 command -v bc >/dev/null 2>&1 || { echo >&2 "'bc' is not installed."; yes | sudo apt-get --assume-yes install bc; }
 
-source $HOME/setenv-local.sh
+### This is the path to the home directory of the project
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+echo "Project directory is set to PROJECT_DIR='$PROJECT_DIR'"
+
+source ${PROJECT_DIR}/setenv-local.sh
 
 set -u # This prevents running the script if any of the variables have not been set
 set -e # Exit if error is detected during pipeline execution
+
+### Domain name
+DOMAIN="cloudderby.io"
 
 ### Camera resolution
 export HORIZONTAL_RESOLUTION_PIXELS="1024"
@@ -35,17 +43,21 @@ export VERTICAL_RESOLUTION_PIXELS="576"
 export DEMO_PROJECT="robot-derby-demo-1"
 export DEMO_INFERENCE_IP_NAME="ml-static-ip-47"
 
+### This is the project that hosts reference images and other admin elements
+ADMIN_PROJECT_ID="administration-203923"
+
 ### Name of the source bucket with images of colored balls (this is one source for all other projects)
 export GCS_SOURCE_IMAGES="cloud-derby-pictures"
 
-### Name of the destination bucket with images of colored balls and whatever other objects
+### Name of the destination bucket with images of colored balls and whatever other objects - used for ML training
 export GCS_IMAGES="${PROJECT}-images-for-training-v-${VERSION}"
 
 ### Store service account private key here
-export SERVICE_ACCOUNT_DIR="$BASE_PATH/.secrets"
+export SERVICE_ACCOUNT_DIR="$PROJECT_DIR/.secrets"
 export SERVICE_ACCOUNT_SECRET="$SERVICE_ACCOUNT_DIR/service-account-secret.json"
 export SERVICE_ACCOUNT="cloud-derby-dev"
 export ALLMIGHTY_SERVICE_ACCOUNT="${SERVICE_ACCOUNT}@${PROJECT}.iam.gserviceaccount.com"
+export DERBY_DEV_ROLE="CloudDerbyDeveloperRole1"
 
 ### Topic where cloud logic sends driving commands to and car reads them from here
 export COMMAND_TOPIC="driving-commands-topic-$CAR_ID"
@@ -274,7 +286,7 @@ install_node()
     lsb_release -a
     echo "We are running on Linux"
     echo_my "Downloading 'node'..."
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     echo_my "Installing 'node'..."
     sudo apt-get install nodejs
   fi
@@ -285,6 +297,17 @@ install_node()
   echo_my "Installing npm modules..."
   npm install
   # npm install --save @google-cloud/debug-agent @google-cloud/bigquery
+}
+
+###############################################################################
+# Lookup Org ID from the Domain name
+###############################################################################
+lookup_org_id() {
+  if [ -z ${ORGANIZATION_ID+x} ] ; then
+      ORGANIZATION_ID=$(gcloud organizations list | grep ${DOMAIN} | awk '{print $2}')
+  fi
+
+  echo "$ORGANIZATION_ID"
 }
 
 echo "setenv-global.sh: done"
