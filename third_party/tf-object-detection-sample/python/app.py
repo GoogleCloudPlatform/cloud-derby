@@ -248,9 +248,9 @@ def check_for_ball_proximity(response_msg):
   
   return response_msg
 
-
+# See details here: https://cloud.google.com/storage/docs/downloading-objects#storage-download-object-python
 def get_image_from_GCS(gcs_uri):
-  try: 
+  try:
     uri_split = gcs_uri.split("/");
     bucket_name = uri_split[2];
     bucket = storage_client.get_bucket(bucket_name)
@@ -259,7 +259,9 @@ def get_image_from_GCS(gcs_uri):
     file_name = uri_split[-1]
     blob.download_to_filename(file_name)
     return file_name
-  except (NotFound, Exception):
+  except Exception as e:
+    print "Error: get_image_from_GCS: while obtaining file from GCS"
+    print e.message
     return None
 
 
