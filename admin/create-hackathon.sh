@@ -112,8 +112,7 @@ create_folders() {
     
     for i in $(seq $TEAM_START_NUM $NUM_TEAMS);
     do
-        gcloud alpha resource-manager folders create --display-name=$(team_folder_name $i) --folder=$PARENT_FOLDER_ID \
-                | true # ignore if already exists
+        gcloud alpha resource-manager folders create --display-name=$(team_folder_name $i) --folder=$PARENT_FOLDER_ID | true # ignore if already exists
 
         local NEW_FOLDER_ID=$(find_folder_id $(team_folder_name $i) $PARENT_FOLDER_ID)
         echo_my "NEW_FOLDER_ID=$NEW_FOLDER_ID"
@@ -279,7 +278,7 @@ print_header "Creating workshop users, folders, etc..."
 
 #create_read_only_group
 
-create_role
+#create_role
 
 #create_groups_and_users
 

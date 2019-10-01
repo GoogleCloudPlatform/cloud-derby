@@ -34,16 +34,16 @@ BILLING_ACCOUNT_ID="<set your Billing ID here>"
 NUM_TEAMS=1
 
 # In case we need to add extra teams - start with some number, otherwise set it to 1
-TEAM_START_NUM=1
+TEAM_START_NUM=3
 
 ### How many people per team
-NUM_PEOPLE_PER_TEAM=1
+NUM_PEOPLE_PER_TEAM=2
 
 ### Name of the event - to be added to user and group names
-EVENT_NAME="QA"
+EVENT_NAME="GA"
 
 ### Folder that holds all project sub-folders for users
-TOP_FOLDER="August-8-$EVENT_NAME"
+TOP_FOLDER="Oct-1-$EVENT_NAME"
 
 ### Directory for temp data
 TMP="tmp"
