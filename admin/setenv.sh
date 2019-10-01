@@ -31,16 +31,16 @@ source ../setenv-global.sh
 BILLING_ACCOUNT_ID="<set your Billing ID here>"
 
 ### How many teams will participate in the workshop
-NUM_TEAMS=1
+NUM_TEAMS=3
 
 # In case we need to add extra teams - start with some number, otherwise set it to 1
 TEAM_START_NUM=1
 
 ### How many people per team
-NUM_PEOPLE_PER_TEAM=1
+NUM_PEOPLE_PER_TEAM=2
 
 ### Name of the event - to be added to user and group names
-EVENT_NAME="GA"
+EVENT_NAME="preGA"
 
 ### Folder that holds all project sub-folders for users
 TOP_FOLDER="Oct-1-$EVENT_NAME"
