@@ -30,45 +30,12 @@ source ../../setenv-global.sh
 print_header "Sensor simulator"
 
 TEMP_DATA=$(pwd)/tmp
-
-echo_my "Using topic $SENSOR_TOPIC to simulate publish of data from the sensor..."
-
-###############################################
-# This is run once after creating new environment
-###############################################
-setup_once()
-{
-    echo_my "one time installation..."
-    install_node
-}
-
-###############################################
-# Check for the GCS bucket
-###############################################
-create_gcs_camera_bucket()
-{
-    if gsutil ls | grep $CAR_CAMERA_BUCKET; then
-        echo_my "Bucket $CAR_CAMERA_BUCKET found OK"
-    else
-        echo_my "Create GCS bucket for images: '$CAR_CAMERA_BUCKET'..."
-        gsutil mb -p $PROJECT gs://$CAR_CAMERA_BUCKET/
-        # Make bucket visible to the public - this is needed for the web app to work to show images in a browser
-        gsutil iam ch allUsers:objectViewer gs://$CAR_CAMERA_BUCKET
-    fi
-}
-
-###############################################
-# MAIN
-###############################################
 INSTALL_FLAG=$TEMP_DATA/install.marker  # Location where the install flag is set to avoid repeated installs
 mkdir -p $TEMP_DATA
-cd js
 
-if [ -f "$INSTALL_FLAG" ]; then
-    echo_my "File '$INSTALL_FLAG' was found = > no need to do the install since it already has been done."
-else
-    setup_once
-    touch $INSTALL_FLAG
+if [[ ! -f "$INSTALL_FLAG" ]]; then
+    install_node
+    touch ${INSTALL_FLAG}
 fi
 
 create_gcs_camera_bucket
@@ -79,18 +46,17 @@ else
     export TEST_IMAGE_FILE=""
 fi
 
-export GOOGLE_APPLICATION_CREDENTIALS=$SERVICE_ACCOUNT_SECRET
+export GOOGLE_APPLICATION_CREDENTIALS=${SERVICE_ACCOUNT_SECRET}
 
-# Local directory where test images
+# Local directory with test images
 export TEST_IMAGE_FOLDER=simulation-images
-
 # Delay in seconds to send test messages
 export DELAY=1
-
 # How many test messages to send - do not forget to have proper number of test images, otherwise it will circle around and repeat many times
 export NUM_ITERATIONS=1
 
 echo "TEST_IMAGE_FILE='$TEST_IMAGE_FILE'"
+cd js
 npm start
 
 print_footer "Sensor simulator has completed sending test messages."
