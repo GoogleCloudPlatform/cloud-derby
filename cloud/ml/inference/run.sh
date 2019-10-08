@@ -73,7 +73,7 @@ if [ -f "$INSTALL_FLAG" ]; then
 else
     set_inference_model
     echo_my "Setting up web app..."
-    sudo pip install Flask==0.12.2 WTForms==2.1 Flask_WTF==0.14.2 Werkzeug==0.12.2 numpy google-cloud-storage
+    sudo pip install --upgrade Flask==0.12.2 WTForms==2.1 Flask_WTF==0.14.2 Werkzeug==0.12.2 numpy google-cloud-storage
     touch $INSTALL_FLAG
 fi
 

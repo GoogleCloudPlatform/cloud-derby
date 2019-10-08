@@ -270,21 +270,41 @@ create_resources()
 }
 
 ###############################################
+# Create GCS bucket to upload images from the car
+###############################################
+create_gcs_camera_bucket()
+{
+  echo_my "Creating GCS bucket for car images..."
+  if gsutil ls | grep ${CAR_CAMERA_BUCKET}; then
+      echo_my "Bucket $CAR_CAMERA_BUCKET found OK"
+  else
+      echo_my "Create GCS bucket for images: '$CAR_CAMERA_BUCKET'..."
+      gsutil mb -p $PROJECT gs://${CAR_CAMERA_BUCKET}/
+      # Make bucket visible to the public - this is needed for the web app to work to show images in a browser
+      gsutil iam ch allUsers:objectViewer gs://${CAR_CAMERA_BUCKET}
+  fi
+}
+
+###############################################
 # Install Node and NPM
 ###############################################
 install_node()
 {
+  local CWD=$(pwd)
+  echo_my "Installing Node.js..."
+
   if which sw_vers; then
-    echo "MAC OS found"
+    echo_my "MAC OS found"
     if which node; then
-      echo "node and npm are already installed"
+      echo_my "node and npm are already installed"
     else
-      echo "Please install and configure nodeJS as described here: https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/"
+      echo_my "Please install and configure nodeJS as described here: https://nodesource
+      .com/blog/installing-nodejs-tutorial-mac-os-x/"
       exit 1
     fi
   else
     lsb_release -a
-    echo "We are running on Linux"
+    echo_my "We are running on Linux"
     echo_my "Downloading 'node'..."
     curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     echo_my "Installing 'node'..."
@@ -297,6 +317,7 @@ install_node()
   echo_my "Installing npm modules..."
   npm install
   # npm install --save @google-cloud/debug-agent @google-cloud/bigquery
+  cd ${CWD}
 }
 
 ###############################################################################

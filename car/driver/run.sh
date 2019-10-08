@@ -144,18 +144,7 @@ else
 	    --public-key path=rsa_cert.pem,type=rs256 | true
 fi
 
-if gsutil ls | grep $CAR_CAMERA_BUCKET; then
-    echo_my "Bucket $CAR_CAMERA_BUCKET found OK"
-else
-    echo_my "Create GCS bucket for images: '$CAR_CAMERA_BUCKET'..."
-    gsutil mb -p $PROJECT gs://$CAR_CAMERA_BUCKET/
-    # Make bucket visible to the public - this is needed for the web app to work to show images in a browser
-    # TODO: do not make this bucket visible to the public and instead let Web App run with the service account that
-    #  will have access to the bucket contents. Also need to run a DEMO inference VM with proper permissions to have
-    #  access to any bucket in the GCP Org
-#    gsutil iam ch allUsers:objectViewer gs://$CAR_CAMERA_BUCKET
-#    gsutil iam ch allUsers:legacyBucketReader gs://$CAR_CAMERA_BUCKET
-fi
+create_gcs_camera_bucket
 
 cd py
 

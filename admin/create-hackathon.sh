@@ -275,13 +275,13 @@ cloudiot.registries.update"
 ###############################################################################
 print_header "Creating workshop users, folders, etc..."
 
-#setup
+setup
 
-#create_read_only_group
+create_read_only_group
 
 create_role
 
-#create_groups_and_users
+create_groups_and_users
 
 create_folders
 
