@@ -64,7 +64,8 @@ class RobotDerbyCar(easygopigo3.EasyGoPiGo3):
         #self.CONST_GRIPPER_GRAB_POSITION = 120
         
         self.Easy_GPG = easygopigo3.EasyGoPiGo3()  # Create an instance of the GoPiGo3 class. GPG will be the GoPiGo3 object.
-        self.gpgGripper = easygopigo3.Servo("SERVO1", self.Easy_GPG)
+        self.gpgGripper1 = easygopigo3.Servo("SERVO1", self.Easy_GPG)
+        self.gpgGripper2 = easygopigo3.Servo("SERVO2", self.Easy_GPG)
         self.my_distance_sensor = self.Easy_GPG.init_distance_sensor()
         self.SetCarStatusLED(self.GREEN)
 
@@ -81,12 +82,14 @@ class RobotDerbyCar(easygopigo3.EasyGoPiGo3):
 
     def GripperClose(self):
         self.SetCarStatusLED(self.RED)
-        self.gpgGripper.rotate_servo(self.CONST_GRIPPER_GRAB_POSITION)
+        self.gpgGripper1.rotate_servo(self.CONST_GRIPPER_GRAB_POSITION)
+        self.gpgGripper2.rotate_servo(self.CONST_GRIPPER_GRAB_POSITION)
         self.SetCarStatusLED(self.GREEN)
 
     def GripperOpen(self):
         self.SetCarStatusLED(self.RED)
-        self.gpgGripper.rotate_servo(self.CONST_GRIPPER_FULL_OPEN)
+        self.gpgGripper1.rotate_servo(self.CONST_GRIPPER_FULL_OPEN)
+        self.gpgGripper2.rotate_servo(self.CONST_GRIPPER_FULL_OPEN)
         self.SetCarStatusLED(self.GREEN)
 
     def ReadDistanceMM(self):
