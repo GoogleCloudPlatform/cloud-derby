@@ -422,10 +422,14 @@ train_model() {
     -- \
     --train_dir=$GCS_ML_BUCKET/train \
     --pipeline_config_path=$GCS_ML_BUCKET/data/$MODEL_CONFIG &
-
+    
+    GC_PID=$!
     # Wait few seconds before showing output
     sleep 5
-    tail -f nohup.out
+    tail -f nohup.out &
+    TAIL_PID=$!
+    wait ${GC_PID}
+    kill ${TAIL_PID}
 
   else
     echo_my "Start REMOTE training job..."
