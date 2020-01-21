@@ -103,6 +103,10 @@ upload_for_training()
 
   echo_my "upload_for_training(): Copy files to the bucket bucket '$GCS_IMAGES'..."
   gsutil cp ./*.zip gs://$GCS_IMAGES
+
+  # Also upload AutoML images and labels
+  gsutil cp labels.csv gs://$GCS_IMAGES
+  gsutil -m cp -R \*/*.jpg gs://$GCS_IMAGES/images
   rm ./*.zip
 }
 
@@ -304,6 +308,45 @@ convert_xml_pixels()
 }
 
 ###############################################
+# Print labels and bounding box into AutoML Format file.
+# Input:
+#   - 1 - jpg file name
+#   - 2 - file width
+#   - 2 - file height
+###############################################
+print_automl_labels()
+{
+  # Make sure that no file is larger than this resolution on any dimension
+  local IMG_FILE=$1
+  local WIDTH=$2
+  local HEIGHT=$3
+  
+  # Truncate eveything after the dot in file extension
+  local XML_FILE=$(echo $IMG_FILE | sed -n -e "s/.jpg*$//p")
+  XML_FILE=${XML_FILE}.xml
+  local XML_STRING=$(cat $XML_FILE)
+
+  # Read values from XML
+  local XMIN=$(echo "$XML_STRING" | perl -ne 'print "$1" if /<xmin>(.*?)<\/xmin>/')
+  local YMIN=$(echo "$XML_STRING" | perl -ne 'print "$1" if /<ymin>(.*?)<\/ymin>/')
+  local XMAX=$(echo "$XML_STRING" | perl -ne 'print "$1" if /<xmax>(.*?)<\/xmax>/')
+  local YMAX=$(echo "$XML_STRING" | perl -ne 'print "$1" if /<ymax>(.*?)<\/ymax>/')
+
+  # Calculate normalized bounding boxes (no need to recalculate overall dimensions as they come in as parameters to this call)
+  local NEW_XMIN=$(echo "scale=4; ($XMIN / $WIDTH)" | bc)
+  local NEW_XMAX=$(echo "scale=4; ($XMAX / $WIDTH)" | bc)
+  local NEW_YMIN=$(echo "scale=4; ($YMIN / $HEIGHT)" | bc)
+  local NEW_YMAX=$(echo "scale=4; ($YMAX / $HEIGHT)" | bc)
+
+
+  local LABEL=$(echo "$IMG_FILE" | perl -ne 'print "$1" if /(.*?)_.*\.jpg/')
+
+  # Write values into AutoML label file
+  echo "UNASSIGNED,gs://${GCS_IMAGES}/images/${IMG_FILE},${LABEL},${NEW_XMIN},${NEW_YMIN},,,${NEW_XMAX},${NEW_YMAX},," >> ${STOCK_FOLDER}/labels.csv
+}
+
+
+###############################################
 # Resize files in a given subfolder to conform to TensorFlow requirements
 # As part of the jpg resizing we will also adjust XML annotations as to not break them
 # Input:
@@ -346,6 +389,9 @@ resize_files()
 
             # Update corresponding XML file to recalculate the coordinates of the bounding box
             convert_xml_pixels $file ${MAX_PIXELS} $WIDTH $HEIGHT $NEW_WIDTH $NEW_HEIGHT
+            print_automl_labels $file ${NEW_WIDTH} ${NEW_HEIGHT}
+        else
+            print_automl_labels $file ${WIDTH} ${HEIGHT}
         fi
     done
 
